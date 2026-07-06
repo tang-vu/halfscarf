@@ -1,0 +1,27 @@
+{
+  "name": "halfscarf",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A football-fan bridge for World Cup 2026: on-device voice translation (QVAC), peer-to-peer over Hyperswarm (Pears), and self-custodial USDt payments (WDK).",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.17"
+  },
+  "scripts": {
+    "spike:wdk": "tsx spikes/a-wdk-payment.ts",
+    "spike:swarm": "tsx spikes/b-hyperswarm.ts",
+    "spike:qvac": "tsx spikes/c-qvac-voice.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tetherto/wdk": "^1.0.0-beta.13",
+    "@tetherto/wdk-wallet-evm": "^1.0.0-beta.15",
+    "hyperswarm": "^4.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  }
+}

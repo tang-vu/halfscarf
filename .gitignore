@@ -1,0 +1,23 @@
+node_modules/
+dist/
+
+# secrets — never commit wallet seeds / keys / RPC keys
+.env
+.env.*
+!.env.example
+*.seed
+*.key
+
+# QVAC model cache (large binaries fetched at runtime)
+models/
+.qvac/
+*.gguf
+*.onnx
+*.bin
+
+# logs & scratch
+*.log
+tmp/
+
+# local agent/editor tooling (not part of the public project)
+.claude/

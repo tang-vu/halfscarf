@@ -3,7 +3,7 @@
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
 ## Now
-**Phase 0 — Recon & de-risking spikes.**
+**Phase 0 COMPLETE — all 3 spikes pass.** Ready to start Phase 1 (payment core app).
 
 ## Done
 - [x] 0.1 Fetched QVAC / Pears / WDK docs; confirmed the three packages exist on npm
@@ -18,15 +18,15 @@
       WDK `account.transfer()`. Tx `0xb557ecd4…1866a1`. Read + write paths fully verified.
 - [x] 0.4 Spike B (Hyperswarm): two Node procs discovered each other over the real public DHT and
       exchanged messages **both ways** — verified. Topic = `sha256(roomCode)`.
-- [ ] 0.5 Spike C (QVAC): install `@qvac/sdk`, read real voice API, fetch models, run one language
-      pair (STT -> translate -> TTS/text), measure latency.
-- [ ] 0.6 Report back at Phase 0 checkpoint (API shapes, latency, Node-vs-Pear decision, risks).
+- [x] 0.5 Spike C (QVAC): **DONE.** Full en->es voice pipeline on-device (Whisper STT -> Bergamot NMT ->
+      Supertonic TTS). Latency: STT ~0.95s, translate ~0.35s, TTS ~3.6s (inference; CPU). See DECISIONS.md.
+- [x] 0.6 Phase 0 checkpoint delivered.
 
 ## Blockers
-- ~~Spike A live transfer needs testnet gas~~ — RESOLVED: user funded dev wallet #0 (0.05 Sepolia ETH),
-  transfer executed.
-- **Spike C:** `@qvac/sdk` runs inference in a **Bare worker**; first install left `@qvac/translation-nmtcpp`
-  incomplete (`ECONNRESET`) → `MODULE_NOT_FOUND`. Force-reinstalling `@qvac` (background). Re-run Spike C after.
+- None. (Spike A gas — resolved by user funding. Spike C `@qvac` partial install — fixed via `--force` reinstall.)
+
+## Runtime decision
+- Build on **Node**; QVAC self-spawns a Bare worker for AI. Full Pear packaging is an optional Phase 2/3 stretch.
 
 ## Phase roadmap (after Phase 0 passes)
 - [ ] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net).

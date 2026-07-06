@@ -74,16 +74,51 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
 - Optional: WDK has a local **PolicyEngine** (`registerPolicy`, default-deny on governed accounts,
   `PolicyViolationError`, `account.simulate.*`) — nice "spend cap" story for a later phase, not needed now.
 
-## QVAC (Local AI) — `from docs`, voice API TBD from installed types/examples
-- Install: `npm i @qvac/sdk`
-- Text-gen quickstart (confirmed shape):
-  `import { loadModel, LLAMA_3_2_1B_INST_Q4_0, completion, unloadModel } from '@qvac/sdk'`
-  `const modelId = await loadModel({ modelSrc: LLAMA_3_2_1B_INST_Q4_0, modelType: 'llm', onProgress })`
-  `const result = completion({ modelId, history, stream: true })` → `for await (token of result.tokenStream)`
-  `await unloadModel({ modelId })`
-- Voice pipeline capabilities (backends): STT = whisper.cpp / NVIDIA Parakeet; translate = fabric-llm.cpp /
-  Bergamot; TTS = ONNX Runtime (Chatterbox / Supertonic). **Exact STT/translate/TTS function names TBD.**
-- Models fetched via a distributed registry (download-lifecycle + sharded-models) — fetch before running.
+## QVAC (Local AI) — `verified` end-to-end (Spike C ran full en->es voice pipeline)
+- Install: `npm i @qvac/sdk` (0.14.1). Pulls ~20 `@qvac/*` native backend subpackages (see RISKS #2).
+- **Runs inference in a spawned Bare worker** (`bare:/…`), not the Node main thread. Node app just drives it.
+- **All calls reconciled against the SDK's shipped examples** in `node_modules/@qvac/sdk/dist/examples/`.
+- Model constants live in `./models/registry`; confirmed: `WHISPER_TINY`, `BERGAMOT_EN_ES`,
+  `TTS_MULTILINGUAL_SUPERTONIC3_Q8_0` (plus many more pairs/sizes). `MODEL_TYPES` enumerates types.
+- **STT (Whisper):**
+  ```ts
+  const id = await loadModel({ modelSrc: WHISPER_TINY,
+    modelConfig: { language: 'en', n_threads: 4, contextParams: { use_gpu: false } }, onProgress })
+  const segs = await transcribe({ modelId: id, audioChunk: '<path.wav>', metadata: true }) // -> {text,startMs,endMs,id}[]
+  ```
+  Input = **16 kHz mono WAV** (path or buffer). `metadata:false` returns a plain string instead of segments.
+- **Translate (Bergamot NMT):**
+  ```ts
+  const id = await loadModel({ modelSrc: BERGAMOT_EN_ES,
+    modelConfig: { engine: 'Bergamot', from: 'en', to: 'es', beamsize: 1, normalize: 1 }, onProgress })
+  const r = translate({ modelId: id, text, modelType: 'nmtcpp-translation', stream: false })
+  const out = await r.text   // NOTE: translate() returns an object; await its `.text` (not a bare string)
+  ```
+- **TTS (Supertonic, multilingual, 31 langs):**
+  ```ts
+  const id = await loadModel({ modelSrc: TTS_MULTILINGUAL_SUPERTONIC3_Q8_0,
+    modelConfig: { ttsEngine: 'supertonic', language: 'es', voice: 'F1', ttsSpeed: 1.05, ttsNumInferenceSteps: 5 }, onProgress })
+  const r = textToSpeech({ modelId: id, text, inputType: 'text', stream: false })
+  const pcm = await r.buffer // Int16Array PCM @ 44.1 kHz (wrap in a WAV header to play)
+  ```
+- `unloadModel({ modelId })` frees each; `onProgress({ percentage, downloaded, total })`. Models auto-download
+  on first `loadModel` and cache to disk (resumable) — first run is slow, cached runs fast.
+- `WHISPER_TINY` config also supports GPU via `contextParams: { use_gpu: true, flash_attn: true, gpu_device: 0 }`
+  (Vulkan present). Spike used CPU for a reliable baseline; GPU is a later optimization.
+- Streaming variants exist for realtime: `transcribeStream`, `textToSpeechStream`, `translate({stream:true})`.
 
-## Measured latency
-- QVAC end-to-end (one language pair): _TBD in Spike C._
+## Measured latency (Spike C, this machine — Windows, CPU inference, whisper-tiny)
+- **STT (Whisper tiny):** ~950–980 ms for a ~6 s clip
+- **Translate (Bergamot en->es):** ~350 ms
+- **TTS (Supertonic multilingual, es):** ~3640 ms (269k samples @ 44.1 kHz ≈ 6 s of audio)
+- **Inference total STT+translate:** ~1.3 s · **incl. TTS:** ~5.0 s
+- First run also pays model download (whisper ~tens of MB, bergamot ~37 MB, supertonic ~127 MB); cached after.
+- Implication: for the live demo, **STT+translate (~1.3 s) is snappy**; run **TTS async / optional** so text
+  appears immediately and speech follows. GPU (Vulkan) should cut these further — later optimization.
+
+## Runtime decision: Node vs Pear/Bare
+- **Decision: build the app on Node** (all three SDKs verified working on Node v24, Windows). WDK + Hyperswarm
+  are plain Node libs; QVAC self-spawns a **Bare worker** for inference, so the AI path is already Bare-native.
+- Because QVAC + WDK both ship `bare` entry points and QVAC's heavy lifting runs under Bare, **full Pear
+  packaging (whole app under `pear run`) is a viable Phase 2/3 stretch** — attempt only if friction-free
+  (per brief), otherwise stay on Node. No blocker either way.

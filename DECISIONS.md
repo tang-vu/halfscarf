@@ -22,14 +22,19 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
 > WDK is split: `@tetherto/wdk` is only the orchestrator; the chain logic lives in separate
 > `@tetherto/wdk-wallet-<chain>` packages. For EVM/Sepolia install `@tetherto/wdk-wallet-evm`.
 
-## Hyperswarm (Pears P2P) — `from docs`, to be re-verified against installed types
-- Install: `npm i hyperswarm`
-- `const swarm = new Hyperswarm(opts)` — opts: `keyPair`, `seed`, `maxPeers` (def 64), `firewall`, `dht`, …
-- Topic is a **32-byte Buffer**: `const topic = Buffer.alloc(32).fill('some-topic-string')`
-- `const discovery = swarm.join(topic, { server: true, client: true })`
-- `swarm.on('connection', (socket, peerInfo) => { … })` — `socket` is an **E2E-encrypted duplex stream**
-  (Node stream API: `socket.write(...)`, `socket.on('data', buf => …)`, `socket.end(...)`).
-- Related building blocks if needed for shared state: `hypercore`, `autobase`, `hyperbee`, `hyperdht`.
+## Hyperswarm (Pears P2P) — `verified` (Spike B ran on the real public DHT)
+- Install: `npm i hyperswarm` (v4.17.0). Ships **no TS types** → local shim `spikes/vendor-hyperswarm.d.ts`.
+- `const swarm = new Hyperswarm(opts)` — opts: `keyPair`, `seed`, `maxPeers` (def 64), `firewall`, `dht`.
+- Topic is a **32-byte Buffer**. halfscarf derives it from a room code: `sha256(roomCode)` (node:crypto)
+  → this is the Phase-2 pairing mechanism (short code / QR → topic).
+- `const discovery = swarm.join(topic, { server: true, client: true })` — symmetric peers use both modes.
+  `await discovery.flushed()` waits until announced on the DHT; `await swarm.flush()` waits for pending peers.
+- `swarm.on('connection', (socket, peerInfo) => { … })` — `socket` is an **E2E (Noise) encrypted duplex**
+  stream: `socket.write(buf)`, `socket.on('data', buf => …)`, `socket.end()`. `peerInfo.publicKey` = 32-byte id.
+- `await swarm.destroy()` to tear down. `swarm.connections` = Set of live sockets.
+- **Verified:** two separate `tsx` processes on this Windows box, same room code, discovered each other over
+  the public DHT and exchanged greetings **both ways** — no server involved. Connection latency a few seconds.
+- Related building blocks for shared state if needed later: `hypercore`, `autobase`, `hyperbee`, `hyperdht`.
 
 ## WDK (Wallets) — `verified` against installed types + a live Sepolia run (Spike A)
 - Install: `npm i @tetherto/wdk @tetherto/wdk-wallet-evm`

@@ -17,7 +17,8 @@
 - [~] 0.3 Spike A (WDK): wallet + address + native + USDt balance **verified live on Sepolia**;
       code for the transfer is written & type-verified. **Live transfer blocked on testnet gas**
       (RISKS #5) — needs a funded Sepolia wallet from the user or a faucet.
-- [ ] 0.4 Spike B (Hyperswarm): two Node procs join a topic, exchange "hello" both ways.
+- [x] 0.4 Spike B (Hyperswarm): two Node procs discovered each other over the real public DHT and
+      exchanged messages **both ways** — verified. Topic = `sha256(roomCode)`.
 - [ ] 0.5 Spike C (QVAC): install `@qvac/sdk`, read real voice API, fetch models, run one language
       pair (STT -> translate -> TTS/text), measure latency.
 - [ ] 0.6 Report back at Phase 0 checkpoint (API shapes, latency, Node-vs-Pear decision, risks).

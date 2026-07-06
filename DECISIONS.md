@@ -61,9 +61,16 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
   - `wdk.getFeeRates('ethereum') -> { normal, fast }` (EIP-1559, wei)
 - **USDt = ERC-20** on EVM: read via `getTokenBalance(addr)`, send via `transfer({ token: addr, ... })`.
   USDt has **6 decimals**. Amounts everywhere are **base-unit `bigint`**.
-- **Testnet target for Spike A: Sepolia.** Read path proven live. **Live transfer needs Sepolia gas
-  (blocker — see RISKS #5).** USDt-on-Sepolia isn't canonical; plan = deploy a 6-decimal "test USDT"
-  ERC-20 from a gas-funded wallet, then `transfer` between two derived accounts.
+- **Testnet target for Spike A: Sepolia. FULLY VERIFIED with a live tx.** USDt-on-Sepolia has no
+  canonical contract, so we deploy `contracts/TestUSDT.sol` (6-decimal ERC-20, USDt stand-in) via
+  `solc` + `ethers` (`spikes/deploy-test-usdt.ts`), then send with WDK's `account.transfer(...)`.
+  - Deploy tooling (dev only): `solc` compiles, `ethers.Wallet.fromPhrase(seed)` deploys. ethers'
+    default path `m/44'/60'/0'/0/0` == WDK `getAccount('ethereum', 0)` (same address — confirmed).
+  - **Live transfer 1.5 USDT (account #0 -> #1):**
+    `0xb557ecd4accbcbe688c6e132aa3757d3c5f48b9f9dc7fd8bc9821c80521866a1` (Sepolia). WDK `transfer`
+    returned `{ hash, fee }` with a real `fee` (gasUsed×price) => tx mined/confirmed.
+  - TestUSDT token: `0x6aDf4df836fC3E1DF8613a78e0CE006504AB2Ec2`. Dev wallet #0 (funded) =
+    `0xD38e838ccfcFDb072329EfF5F0e0f80659CE4EE9`; recipient #1 = `0x2F108358C65F883E37BcF244ee3c9c0c70c59BAB`.
 - Optional: WDK has a local **PolicyEngine** (`registerPolicy`, default-deny on governed accounts,
   `PolicyViolationError`, `account.simulate.*`) — nice "spend cap" story for a later phase, not needed now.
 

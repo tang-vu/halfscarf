@@ -15,12 +15,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@qvac/sdk": "^0.14.1",
     "@tetherto/wdk": "^1.0.0-beta.13",
     "@tetherto/wdk-wallet-evm": "^1.0.0-beta.15",
     "hyperswarm": "^4.17.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
+    "ethers": "^6.17.0",
+    "solc": "^0.8.35",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   }

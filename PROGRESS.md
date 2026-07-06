@@ -14,19 +14,19 @@
 
 ## Next
 - [x] 0.2 `npm install` deps; read + verify real WDK APIs from `node_modules` types.
-- [~] 0.3 Spike A (WDK): wallet + address + native + USDt balance **verified live on Sepolia**;
-      code for the transfer is written & type-verified. **Live transfer blocked on testnet gas**
-      (RISKS #5) — needs a funded Sepolia wallet from the user or a faucet.
+- [x] 0.3 Spike A (WDK): **DONE.** Deployed TestUSDT ERC-20, sent **1.5 USDT live on Sepolia** via
+      WDK `account.transfer()`. Tx `0xb557ecd4…1866a1`. Read + write paths fully verified.
 - [x] 0.4 Spike B (Hyperswarm): two Node procs discovered each other over the real public DHT and
       exchanged messages **both ways** — verified. Topic = `sha256(roomCode)`.
 - [ ] 0.5 Spike C (QVAC): install `@qvac/sdk`, read real voice API, fetch models, run one language
       pair (STT -> translate -> TTS/text), measure latency.
 - [ ] 0.6 Report back at Phase 0 checkpoint (API shapes, latency, Node-vs-Pear decision, risks).
 
-## Blockers (need user)
-- **Spike A live transfer:** need Sepolia testnet gas. Either provide a funded Sepolia seed/key
-  (goes in gitignored `.env`), or fund a generated dev address. Read path already proven, so this
-  only gates the final tx-hash step. B and C proceed in parallel meanwhile.
+## Blockers
+- ~~Spike A live transfer needs testnet gas~~ — RESOLVED: user funded dev wallet #0 (0.05 Sepolia ETH),
+  transfer executed.
+- **Spike C:** `@qvac/sdk` runs inference in a **Bare worker**; first install left `@qvac/translation-nmtcpp`
+  incomplete (`ECONNRESET`) → `MODULE_NOT_FOUND`. Force-reinstalling `@qvac` (background). Re-run Spike C after.
 
 ## Phase roadmap (after Phase 0 passes)
 - [ ] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net).

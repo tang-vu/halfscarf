@@ -110,6 +110,7 @@ src/
   server/    Node HTTP server + JSON API + loopback SSE bridge
   web/       two-pane "two fans, two nations" browser UI (vanilla HTML/CSS/JS)
   config.ts  per-instance config (name, nation, flag, language, wallet seed)
+site/        Static landing page (deployed to Vercel; the app itself always runs on-device)
 spikes/      Throwaway Phase-0 spikes proving each SDK + the TestUSDT deploy helper
 contracts/   TestUSDT.sol — 6-decimal ERC-20 USDt stand-in for Sepolia
 PROGRESS.md  What's done / what's next  (resume a session from here)

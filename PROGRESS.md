@@ -93,6 +93,11 @@ Hyperswarm discovery reliable (first join can miss otherwise). `npm run typechec
 - [x] Phase 4 — Demo polish: two-pane UI, language labels, quick-tips, speech banner, README + demo script. ✅
       (Remaining human step: record the 3-min video. Optional stretches below.)
 
+## Extras
+- [x] **Landing page** (`site/` + root `vercel.json`, static, zero-build) — dark "matchday editorial"
+      split-scarf design; pure-CSS 14s demo loop; all metrics on it are real measured numbers.
+      Deploy: import the GitHub repo on vercel.com (zero-config) or `npx vercel --prod` from repo root.
+
 ## Optional stretches (not required by the brief) — all resolved
 - [x] Peer-side **TTS** so the translation is *heard*, not just read. ✅ DONE.
 - [x] **QR code** for the room code (+ `?room=` deep link). ✅ DONE.

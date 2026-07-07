@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>halfscarf — two fans, nothing in common, one scarf</title>
+  <meta name="description" content="A football-fan bridge for World Cup 2026: on-device AI voice translation, direct peer-to-peer connection, self-custodial USDt payments. No server. No cloud. No custodian." />
+  <meta property="og:title" content="halfscarf — two fans, nothing in common, one scarf" />
+  <meta property="og:description" content="Talk across the language barrier, connect with no server in the middle, settle the beer bet in USDt. Built for the Tether Developers Cup." />
+  <meta name="theme-color" content="#0a0e1a" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧣</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,700;10..72,800;10..72,900&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <!-- scoreboard ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>ON-DEVICE AI — ZERO CLOUD</span><i>⚽</i>
+      <span>1.78s MIC → TRANSLATED TEXT, MEASURED</span><i>⚽</i>
+      <span>PEER-TO-PEER — ZERO SERVERS</span><i>⚽</i>
+      <span>SELF-CUSTODIAL USDt — ZERO CUSTODIANS</span><i>⚽</i>
+      <span>LIVE ON SEPOLIA · TX 0xb557ecd4…1866a1</span><i>⚽</i>
+      <span>WORLD CUP 2026 · 48 NATIONS · ONE SCARF</span><i>⚽</i>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="halfscarf — home">
+      <span class="brand-mark" aria-hidden="true">⚽🧣</span>
+      <span class="brand-name">halfscarf</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#problem">The problem</a>
+      <a href="#match">Matchday</a>
+      <a href="#tracks">Three tracks</a>
+      <a href="#run">Run it</a>
+    </nav>
+    <a class="gh-btn" href="https://github.com/tang-vu/halfscarf" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </header>
+
+  <!-- ============ HERO — the page is a half-and-half scarf ============ -->
+  <main id="top">
+    <section class="hero" aria-label="Introduction">
+      <div class="hero-half hero-left" aria-hidden="true"></div>
+      <div class="hero-half hero-right" aria-hidden="true"></div>
+      <div class="seam" aria-hidden="true"></div>
+
+      <div class="hero-inner">
+        <p class="kicker reveal">World Cup 2026 · built for the <strong>Tether Developers Cup</strong></p>
+        <h1 class="display">
+          <span class="line reveal d1">Two fans.</span>
+          <span class="line reveal d2">Nothing<em class="accent-a"> in</em><em class="accent-b"> common.</em></span>
+          <span class="line reveal d3">One scarf.</span>
+        </h1>
+        <p class="lede reveal d4">
+          She speaks Spanish. He speaks English. The stadium Wi-Fi is on its knees and neither
+          carries the other's currency. halfscarf joins their two phones <b>directly</b> — voice
+          translated by AI that never leaves the device, over a link with no server in the middle,
+          settling the beer bet in USDt from wallets only they hold.
+        </p>
+        <div class="cta-row reveal d5">
+          <a class="btn btn-solid" href="https://github.com/tang-vu/halfscarf" target="_blank" rel="noopener">Get the code
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#match">Watch it move
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14m0 0 6-6m-6 6-6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <!-- match ticket: the three tracks as the lineup -->
+        <aside class="ticket reveal d6" aria-label="The three tracks, as a match ticket">
+          <div class="ticket-head">
+            <span class="mono">ADMIT&nbsp;2</span>
+            <span class="mono">GATE&nbsp;P2P</span>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-row"><span class="dot dot-a"></span><b>QVAC</b><span>local AI — speech in, translation out, on-device</span></div>
+            <div class="ticket-row"><span class="dot dot-g"></span><b>PEARS</b><span>Hyperswarm DHT — fan-to-fan, no relay</span></div>
+            <div class="ticket-row"><span class="dot dot-b"></span><b>WDK</b><span>self-custodial USDt — seeds stay home</span></div>
+          </div>
+          <div class="ticket-tear" aria-hidden="true"></div>
+          <div class="ticket-stub mono">HS-2026 · §104 · ROW 7</div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ THE PROBLEM — three torn stubs ============ -->
+    <section class="problem" id="problem" aria-label="The problem">
+      <h2 class="sect-title reveal"><span class="mono sect-no">01</span>Half-time, concourse B.<br />Three walls between two strangers.</h2>
+      <div class="stubs">
+        <article class="stub reveal">
+          <span class="stub-no mono">NO. 1</span>
+          <h3>No common language</h3>
+          <p>“¿Viste ese gol?” meets a blank smile. Translation apps want the cloud; the cloud wants a signal.</p>
+          <span class="stub-fix fix-a">→ solved on-device · QVAC</span>
+        </article>
+        <article class="stub reveal d2">
+          <span class="stub-no mono">NO. 2</span>
+          <h3>No reliable network</h3>
+          <p>80,000 phones on one cell tower. Anything that needs a server is already out of the match.</p>
+          <span class="stub-fix fix-g">→ solved peer-to-peer · Pears</span>
+        </article>
+        <article class="stub reveal d3">
+          <span class="stub-no mono">NO. 3</span>
+          <h3>No common currency</h3>
+          <p>Pesos in one pocket, pounds in the other, and the beer queue takes neither.</p>
+          <span class="stub-fix fix-b">→ solved in USDt · WDK</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ MATCHDAY — self-running product demo ============ -->
+    <section class="match" id="match" aria-label="Product demo">
+      <h2 class="sect-title reveal"><span class="mono sect-no">02</span>Ninety seconds of matchday,<br />on a fourteen-second loop.</h2>
+      <p class="sect-sub reveal">A faithful re-run of the real app: every number below was measured on a live session, not invented.</p>
+
+      <div class="pitch reveal" role="img" aria-label="Animated demo: Alice speaks Spanish, Bob receives it in English over the peer-to-peer link, then tips 1 USDt back to Alice.">
+        <!-- Alice -->
+        <div class="pane pane-a">
+          <div class="pane-head">
+            <svg class="pane-flag" viewBox="0 0 36 24" aria-label="Argentina" role="img"><rect width="36" height="24" rx="3" fill="#74ACDF"/><rect y="8" width="36" height="8" fill="#F5F0E6"/><circle cx="18" cy="12" r="3" fill="#F6B40E"/></svg>
+            <div><b>Alice</b><span class="mono pane-lang">habla Español</span></div><span class="pane-bal mono">1,204.50 <i>USDT</i><em class="bal-bump">+1.00</em></span></div>
+          <div class="mic-chip"><span class="mic-ring" aria-hidden="true"></span>Hold to talk</div>
+          <div class="said"><span class="mono said-label">🎙 says</span><p class="said-text">“Hola amigo mío. ¡Bienvenido a la Copa del Mundo!”</p></div>
+          <div class="toast-paid mono">💸 +1 USDT · over the same P2P link</div>
+        </div>
+
+        <!-- the wire -->
+        <div class="wire" aria-hidden="true">
+          <span class="wire-line"></span>
+          <span class="packet packet-voice mono">voice · noise-encrypted</span>
+          <span class="packet packet-coin mono">🍺 1 USDT</span>
+          <span class="wire-tag mono">Hyperswarm · no server</span>
+        </div>
+
+        <!-- Bob -->
+        <div class="pane pane-b">
+          <div class="pane-head">
+            <svg class="pane-flag" viewBox="0 0 36 24" aria-label="England" role="img"><rect width="36" height="24" rx="3" fill="#F5F0E6"/><rect x="15" width="6" height="24" fill="#E0293F"/><rect y="9" width="36" height="6" fill="#E0293F"/></svg>
+            <div><b>Bob</b><span class="mono pane-lang">speaks English</span></div><span class="pane-bal mono">45.00 <i>USDT</i></span></div>
+          <p class="idle mono" aria-hidden="true">▚ listening on the swarm…</p>
+          <div class="banner"><span class="mono banner-meta">Alice · on-device translation · 🔊</span><p class="banner-text">“Hello my friend. Welcome to the World Cup!”</p></div>
+          <button class="tip-chip" tabindex="-1" aria-hidden="true">🍺 Tip 1 USDT</button>
+        </div>
+      </div>
+
+      <ol class="loop-legend mono reveal">
+        <li><b>00s</b> Alice holds the mic</li>
+        <li><b>02s</b> Whisper + Bergamot run on <em>her</em> phone — 1.78s, no cloud</li>
+        <li><b>04s</b> the sentence crosses fan-to-fan, Noise-encrypted</li>
+        <li><b>06s</b> Bob reads it — and hears it, TTS on <em>his</em> phone</li>
+        <li><b>09s</b> Bob tips 🍺 1 USDt — on-chain, self-custodial</li>
+        <li><b>12s</b> Alice’s wallet ticks up. Rematch.</li>
+      </ol>
+    </section>
+
+    <!-- ============ THREE TRACKS — asymmetric bento ============ -->
+    <section class="tracks" id="tracks" aria-label="The three tracks">
+      <h2 class="sect-title reveal"><span class="mono sect-no">03</span>One meetup,<br />all three tracks of the Cup.</h2>
+
+      <div class="bento">
+        <article class="card card-qvac reveal">
+          <header><span class="chip chip-a">QVAC · local AI</span><h3>The whole AI stack lives on the phone.</h3></header>
+          <p>Push-to-talk. Whisper transcribes, Bergamot translates, Supertonic speaks — three models, one device, zero requests leaving it. The peer <b>hears</b> your words in their own language.</p>
+          <dl class="stats mono">
+            <div><dt>speech → text</dt><dd>0.95<i>s</i></dd></div>
+            <div><dt>translate</dt><dd>0.35<i>s</i></dd></div>
+            <div><dt>text → speech</dt><dd>2.3<i>s</i></dd></div>
+            <div class="stat-hero"><dt>mic → translated text, measured live</dt><dd>1.78<i>s</i></dd></div>
+          </dl>
+        </article>
+
+        <article class="card card-pears reveal d2">
+          <header><span class="chip chip-g">PEARS · P2P</span><h3>No server. Not “serverless” — <em>none</em>.</h3></header>
+          <p>A shared room code — typed, or scanned as a QR — becomes a DHT topic. Two devices find each other on the public swarm and speak directly over an end-to-end encrypted stream.</p>
+          <div class="flow mono">
+            <span>room code</span><i>→</i><span>sha256</span><i>→</i><span>DHT topic</span><i>→</i><span>Noise stream</span>
+          </div>
+          <p class="fine mono">paired in 6–9s across the public internet · chat, payments &amp; voice share one channel</p>
+        </article>
+
+        <article class="card card-wdk reveal d3">
+          <header><span class="chip chip-b">WDK · wallets</span><h3>The beer bet settles on-chain.</h3></header>
+          <p>Each fan’s wallet is generated on their device and stays there — halfscarf never sees a seed. Tips and requests ride the same P2P channel; the transfer itself is a real USDt transaction.</p>
+          <p class="fine mono">live testnet transfer · <a href="https://sepolia.etherscan.io/tx/0xb557ecd4accbcbe688c6e132aa3757d3c5f48b9f9dc7fd8bc9821c80521866a1" target="_blank" rel="noopener">0xb557ecd4…1866a1 ↗</a></p>
+        </article>
+
+        <aside class="card card-zero reveal d4" aria-label="What this architecture does not have">
+          <div class="zero mono"><b>0</b><span>servers</span></div>
+          <div class="zero mono"><b>0</b><span>cloud AI calls</span></div>
+          <div class="zero mono"><b>0</b><span>custodians</span></div>
+          <div class="zero mono"><b>0</b><span>seeds leaving the device</span></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ RUN IT ============ -->
+    <section class="run" id="run" aria-label="Quick start">
+      <h2 class="sect-title reveal"><span class="mono sect-no">04</span>Kick off in three commands.</h2>
+      <div class="term reveal" role="figure" aria-label="Terminal quick start">
+        <div class="term-bar"><i></i><i></i><i></i><span class="mono">two terminals · one match</span></div>
+        <pre class="mono"><code><span class="cmt"># clone &amp; install (Node ≥ 22.17)</span>
+<span class="ps">$</span> git clone https://github.com/tang-vu/halfscarf &amp;&amp; cd halfscarf &amp;&amp; npm install
+
+<span class="cmt"># fan one — Alice 🇦🇷</span>
+<span class="ps">$</span> INSTANCE=Alice NATION=Argentina FLAG=🇦🇷 LANG_CODE=es PORT=3001 npm start
+
+<span class="cmt"># fan two — Bob 🏴</span>
+<span class="ps">$</span> INSTANCE=Bob NATION=England FLAG=🏴 LANG_CODE=en PORT=3002 npm start</code></pre>
+      </div>
+      <p class="run-tip reveal mono">then open <b>localhost:3001/?room=worldcup-final</b> and <b>:3002/?room=worldcup-final</b> — they pair themselves. Or show a QR on one screen and scan it with the other.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-seam" aria-hidden="true"></div>
+    <div class="foot-inner">
+      <p class="foot-brand"><span aria-hidden="true">⚽🧣</span> halfscarf</p>
+      <p class="foot-note">MIT licensed · built for the Tether Developers Cup · QVAC × Pears × WDK</p>
+      <a class="gh-btn" href="https://github.com/tang-vu/halfscarf" target="_blank" rel="noopener">Read the source</a>
+    </div>
+  </footer>
+
+  <script src="/main.js" defer></script>
+</body>
+</html>

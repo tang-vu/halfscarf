@@ -52,7 +52,9 @@ const TTS_SAMPLE_RATE = 44100
 
 export class VoiceService {
   private whisperId: string | null = null
-  private nmtIds = new Map<string, string>() // "from-to" -> modelId
+  private whisperLoading: Promise<string> | null = null
+  private nmtLoading = new Map<string, Promise<string>>() // "from-to" -> in-flight/settled load
+  private nmtIds = new Map<string, string>() // "from-to" -> modelId (for dispose)
   private ttsId: string | null = null
   private ttsLoading: Promise<string> | null = null
   private loading: Promise<void> | null = null
@@ -60,28 +62,43 @@ export class VoiceService {
   /** @param srcLang this fan's spoken language (e.g. "en", "es") */
   constructor(private srcLang: string) {}
 
-  private async ensureWhisper(): Promise<string> {
-    if (this.whisperId) return this.whisperId
-    const whisper = (QVAC as Record<string, unknown>).WHISPER_TINY as { name: string }
-    this.whisperId = (await QVAC.loadModel({
-      modelSrc: whisper,
-      modelConfig: { language: this.srcLang, n_threads: 4, contextParams: { use_gpu: false } },
-    })) as string
-    return this.whisperId
+  /** Promise-cached: warm() and a concurrent /api/speak must never double-load the model. */
+  private ensureWhisper(): Promise<string> {
+    if (!this.whisperLoading) {
+      this.whisperLoading = (async () => {
+        const whisper = (QVAC as Record<string, unknown>).WHISPER_TINY as { name: string }
+        const id = (await QVAC.loadModel({
+          modelSrc: whisper,
+          modelConfig: { language: this.srcLang, n_threads: 4, contextParams: { use_gpu: false } },
+        })) as string
+        this.whisperId = id
+        return id
+      })()
+      this.whisperLoading.catch(() => {
+        this.whisperLoading = null // failed load — allow a retry
+      })
+    }
+    return this.whisperLoading
   }
 
-  private async ensureNmt(from: string, to: string): Promise<string> {
+  private ensureNmt(from: string, to: string): Promise<string> {
     const key = `${from}-${to}`
-    const existing = this.nmtIds.get(key)
-    if (existing) return existing
-    const model = bergamotFor(from, to)
-    if (!model) throw new Error(`no on-device translation model for ${from} -> ${to}`)
-    const id = (await QVAC.loadModel({
-      modelSrc: model,
-      modelConfig: { engine: 'Bergamot', from, to, beamsize: 1, normalize: 1 },
-    })) as string
-    this.nmtIds.set(key, id)
-    return id
+    let load = this.nmtLoading.get(key)
+    if (!load) {
+      load = (async () => {
+        const model = bergamotFor(from, to)
+        if (!model) throw new Error(`no on-device translation model for ${from} -> ${to}`)
+        const id = (await QVAC.loadModel({
+          modelSrc: model,
+          modelConfig: { engine: 'Bergamot', from, to, beamsize: 1, normalize: 1 },
+        })) as string
+        this.nmtIds.set(key, id)
+        return id
+      })()
+      this.nmtLoading.set(key, load)
+      load.catch(() => this.nmtLoading.delete(key)) // failed load — allow a retry
+    }
+    return load
   }
 
   /**

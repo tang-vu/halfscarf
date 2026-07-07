@@ -5,7 +5,11 @@
 ## Session handoff (read first if resuming)
 - **Git:** branch `main`, working tree clean, all work committed **and pushed** to
   `origin` = https://github.com/tang-vu/halfscarf.git.
-- **Build state:** Phases 0–4 complete. The product runs; all three tracks verified end to end.
+- **Build state:** Phases 0–4 + all stretches complete. Full pipeline re-verified end to end over
+  HTTP after the final changes (no mic needed — Spike C's WAV piped into `/api/speak`): Alice (en)
+  STT+translate **1.78s warm** → correct Spanish → `voice` frame arrived on Bob's SSE via
+  Hyperswarm → Bob's `/api/hear` returned valid Spanish speech WAV (4.2s synth). Wallets demo-ready
+  (Alice ~999,953 TestUSDT + gas; Bob 45).
 - **Ephemeral local state NOT in git — already set up, do NOT regenerate:**
   - `.env` → `WDK_SEED` (funded dev wallet #0 = `0xD38e838ccfcFDb072329EfF5F0e0f80659CE4EE9`),
     `USDT_ADDRESS` = `0x6aDf4df836fC3E1DF8613a78e0CE006504AB2Ec2` (deployed TestUSDT), `SEPOLIA_RPC_URL`.

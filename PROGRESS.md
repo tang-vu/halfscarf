@@ -3,7 +3,15 @@
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
 ## Now
-**Phase 3 COMPLETE — on-device voice translation wired into the live P2P session.** Next: Phase 4 (demo polish).
+**Phases 0–4 COMPLETE — full product integrated and demoable.** All three tracks work end to end.
+Remaining: record the 3-minute demo video; optional stretches (peer-side TTS "hearing", QR pairing,
+Pear packaging). See end of file for phase roadmap.
+
+Phase 4 (polish) added: language labels per fan, quick-tip buttons, a prominent translated-speech
+banner, clearer on-device / no-server framing, and a complete README (run steps + 3-min demo script +
+track mapping). `node --check` on the UI + `npm run typecheck` (src) both clean.
+
+### Previously (Phase 3)
 
 Push-to-talk in the browser → capture mic, downsample to 16 kHz PCM → `/api/speak` → QVAC STT (fan's
 language) + Bergamot translate (→ peer's language), all on-device (Bare worker) → the translated text is
@@ -40,4 +48,10 @@ Hyperswarm discovery reliable (first join can miss otherwise). `npm run typechec
 - [x] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net). ✅
 - [x] Phase 2 — P2P connection over Hyperswarm (room code). Chat + payment requests + payments, no server. ✅
 - [x] Phase 3 — On-device QVAC voice translation wired into the live P2P session (push-to-talk → STT+translate → peer). ✅
-- [ ] Phase 4 — Demo polish (two-pane "two fans, two nations" UI, README repro, 3-min video).
+- [x] Phase 4 — Demo polish: two-pane UI, language labels, quick-tips, speech banner, README + demo script. ✅
+      (Remaining human step: record the 3-min video. Optional stretches below.)
+
+## Optional stretches (not required by the brief)
+- Peer-side **TTS** so the translation is *heard*, not just read (QVAC TTS proven in Spike C).
+- **QR code** for the room code (currently a shared text code).
+- Package as a **Pear app** (`pear run`) — QVAC already runs under Bare, so likely viable.

@@ -27,3 +27,5 @@ tmp/
 
 # per-instance wallet seeds (secrets)
 .data/
+
+.vercel

@@ -15,6 +15,31 @@ Built for the **Tether Developers Cup**, combining all three tracks:
 > Status: **Phases 0–4 complete + peer-side TTS — all three tracks integrated and demoable end to
 > end; translations are heard, not just read.** See `PROGRESS.md` for the live build state,
 > `DECISIONS.md` for the verified SDK APIs + measured latency.
+>
+> 🌐 Landing page: **[halfscarf.vercel.app](https://halfscarf.vercel.app)** (the app itself always runs on-device — see below).
+
+## ⚡ Judges: run it in two minutes (no blockchain setup)
+
+The app needs **no `.env` and no faucet** to demo its core: each instance generates its own wallet,
+and P2P + on-device voice translation work immediately. Only the USDt send/balance features need
+the optional token setup below.
+
+```bash
+git clone https://github.com/tang-vu/halfscarf && cd halfscarf && npm install
+# terminal 1                                                  # terminal 2
+INSTANCE=Alice NATION=Argentina FLAG=🇦🇷 LANG_CODE=es PORT=3001 npm start
+INSTANCE=Bob   NATION=England   FLAG=🏴 LANG_CODE=en PORT=3002 npm start
+```
+
+Then open `http://localhost:3001/?room=demo` and `http://localhost:3002/?room=demo` — the two fans
+pair over the public Hyperswarm DHT (~10s), and you can chat and **hold 🎙️ to talk** across the
+language barrier (first utterance downloads the AI models once, then ~1.8s per phrase — all
+inference on-device). Requires Node ≥ 22.17; on Windows/Linux a Vulkan runtime (standard with GPU
+drivers) for QVAC.
+
+> **Windows note:** the `VAR=value npm start` syntax above is for bash — use **Git Bash** (ships
+> with Git for Windows, and is how this repo was developed), or in PowerShell set the variables
+> first: `$env:INSTANCE='Alice'; $env:LANG_CODE='es'; $env:PORT='3001'; npm start`.
 
 ---
 
@@ -99,6 +124,37 @@ Two fans, two nations, one device each:
 
 Guarantees: the entire AI path runs on-device (QVAC Bare worker, no cloud); every fan-to-fan byte is
 Hyperswarm; wallets are self-custodial (seeds never leave the device).
+
+## Track compliance & disclosure
+
+**QVAC (Local AI).** Every AI inference — Whisper STT, Bergamot translation, Supertonic TTS — runs
+on the fan's own device via `@qvac/sdk` (in its Bare worker). **Zero cloud AI APIs, zero API keys.**
+Models download once from QVAC's registry, then everything runs from local cache.
+
+**Pears (P2P).** All fan-to-fan networking is Hyperswarm: room code → SHA-256 → DHT topic →
+Noise-encrypted duplex stream. No WebRTC, no signalling server, no relay. The browser UI talks only
+to *its own* local Node process over loopback (SSE + POST) — local IPC, never fan-to-fan transport.
+(Full Pear packaging was assessed and documented in `DECISIONS.md`; QVAC inference already runs
+under Bare.)
+
+**WDK (Wallets).** Wallets are generated and held on-device via `@tetherto/wdk` +
+`@tetherto/wdk-wallet-evm`; seeds live in `.data/` and never leave the machine. Transfers are real
+ERC-20 transactions on Sepolia. USDt has no canonical Sepolia contract, so a 6-decimal stand-in is
+deployed from `contracts/TestUSDT.sol` (disclosed substitution — see `DECISIONS.md`).
+
+**Third-party services** (none are AI; none carry fan-to-fan traffic):
+| Service | Used for |
+| --- | --- |
+| Public Sepolia RPC (`sepolia.drpc.org` default) | chain reads + sending transfers |
+| Hyperswarm public DHT | peer **discovery** only — payload stays E2E encrypted |
+| QVAC model registry | one-time model download, cached locally |
+| Etherscan / Google Fonts / Vercel | explorer links in UI / landing page (`site/`) only |
+
+**Pre-built dependencies:** `@qvac/sdk`, `@tetherto/wdk`, `@tetherto/wdk-wallet-evm`, `hyperswarm`,
+`qrcode`, `jsqr`; dev-only: `ethers` + `solc` (TestUSDT deploy spike), `tsx`, TypeScript.
+
+**Prior work:** none — every commit in this repo was written during the event (history starts
+July 6, 2026; progress is traceable commit-by-commit in `PROGRESS.md` and git log).
 
 ## Repository layout
 

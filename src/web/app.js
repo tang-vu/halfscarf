@@ -48,6 +48,31 @@ function showSpeech(flag, name, text) {
   speechTimer = setTimeout(() => (b.hidden = true), 9000)
 }
 
+// Play the peer's translated words ALOUD in this fan's language (QVAC TTS, on-device).
+// The text is already on screen, so any failure here degrades to read-only — never blocks.
+let audioHintShown = false
+async function playTranslation(text) {
+  if (!text) return
+  try {
+    const res = await fetch('/api/hear', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ text }),
+    })
+    if (!res.ok) return
+    const url = URL.createObjectURL(await res.blob())
+    const audio = new Audio(url)
+    audio.onended = () => URL.revokeObjectURL(url)
+    await audio.play()
+  } catch {
+    // Most likely the browser's autoplay policy (no user gesture yet).
+    if (!audioHintShown) {
+      audioHintShown = true
+      toast('🔇 Click the page once to enable audio')
+    }
+  }
+}
+
 function logEntry({ kind, html, href, action }) {
   const list = $('logList')
   const empty = list.querySelector('.empty')
@@ -112,7 +137,7 @@ function showPeer(id) {
   $('peerNameShort').textContent = id.name || 'them'
   $('peerLang').textContent = `speaks ${langName(id.lang)}`
   $('micBtn').disabled = false
-  $('micHint').textContent = `You speak ${langName(cfg.lang)} → ${id.name} reads ${langName(id.lang)} · on-device (QVAC)`
+  $('micHint').textContent = `You speak ${langName(cfg.lang)} → ${id.name} hears ${langName(id.lang)} · on-device (QVAC)`
 }
 
 // --- P2P event stream (SSE) ---
@@ -143,6 +168,7 @@ function setupSSE() {
       setTimeout(refreshWallet, 1500)
     } else if (m.type === 'voice') {
       showSpeech(peer ? peer.flag : '🎙️', peer ? peer.name : 'Peer', m.dstText)
+      playTranslation(m.dstText) // async: text shows instantly, speech follows
       logEntry({
         kind: 'voice',
         html: `🎙️ <b>${escapeHtml(peer ? peer.name : 'them')} (${escapeHtml(langName(m.srcLang))}):</b> “${escapeHtml(m.srcText)}”<br><span class="xlate">→ you hear (${escapeHtml(langName(m.dstLang))}): <b>${escapeHtml(m.dstText)}</b></span>`,

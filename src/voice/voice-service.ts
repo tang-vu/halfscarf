@@ -5,8 +5,11 @@
  *   mic PCM (16 kHz mono) --Whisper STT (fan's language)--> source text
  *     --Bergamot NMT (fan lang -> peer lang)--> translated text
  *
- * Models are loaded lazily and REUSED across utterances (STT ~1s, translate ~0.35s), so
- * push-to-talk stays snappy. Model constants are looked up dynamically by language pair.
+ * The reverse direction — the peer's translated words arriving as text — can be HEARD too:
+ * `synthesizeSpeech` runs Supertonic TTS in this fan's own language and returns playable WAV.
+ *
+ * Models are loaded lazily and REUSED across utterances (STT ~1s, translate ~0.35s, TTS a few
+ * seconds), so push-to-talk stays snappy. Model constants are looked up dynamically by language.
  */
 
 import { writeFileSync, unlinkSync } from 'node:fs'
@@ -44,9 +47,14 @@ export interface SpeechResult {
   dstText: string
 }
 
+/** Supertonic multilingual TTS emits 16-bit mono PCM at this fixed rate (verified in Spike C). */
+const TTS_SAMPLE_RATE = 44100
+
 export class VoiceService {
   private whisperId: string | null = null
   private nmtIds = new Map<string, string>() // "from-to" -> modelId
+  private ttsId: string | null = null
+  private ttsLoading: Promise<string> | null = null
   private loading: Promise<void> | null = null
 
   /** @param srcLang this fan's spoken language (e.g. "en", "es") */
@@ -74,6 +82,43 @@ export class VoiceService {
     })) as string
     this.nmtIds.set(key, id)
     return id
+  }
+
+  /**
+   * Load the multilingual Supertonic TTS model once and reuse it. The voice is fixed to THIS
+   * fan's language — incoming translated text is always already in it. Promise-cached so a
+   * `warm()` and an early request never double-load the model.
+   */
+  private ensureTts(): Promise<string> {
+    if (!this.ttsLoading) {
+      this.ttsLoading = (async () => {
+        const model = (QVAC as Record<string, unknown>).TTS_MULTILINGUAL_SUPERTONIC3_Q8_0 as { name: string }
+        const id = (await QVAC.loadModel({
+          modelSrc: model,
+          modelConfig: { ttsEngine: 'supertonic', language: this.srcLang, voice: 'F1', ttsSpeed: 1.05, ttsNumInferenceSteps: 5 },
+        })) as string
+        this.ttsId = id
+        return id
+      })()
+      this.ttsLoading.catch(() => {
+        this.ttsLoading = null // failed load (e.g. download interrupted) — allow a retry
+      })
+    }
+    return this.ttsLoading
+  }
+
+  /**
+   * Synthesize `text` as speech in THIS fan's language, on-device (Supertonic).
+   * Returns a playable WAV (16-bit mono, 44.1 kHz) — used so the peer's translated
+   * words are HEARD, not just read.
+   */
+  async synthesizeSpeech(text: string): Promise<Buffer> {
+    const id = await this.ensureTts()
+    const result = QVAC.textToSpeech({ modelId: id, text, inputType: 'text', stream: false })
+    // Samples cross the Bare-worker RPC boundary as a plain number[] — normalize to Int16Array.
+    const samples = (await result.buffer) as ArrayLike<number>
+    const pcm = samples instanceof Int16Array ? samples : Int16Array.from(samples)
+    return wavFromPcm16(Buffer.from(pcm.buffer, pcm.byteOffset, pcm.byteLength), TTS_SAMPLE_RATE)
   }
 
   /**
@@ -107,13 +152,18 @@ export class VoiceService {
     }
   }
 
-  /** Optionally warm the STT model so the first utterance is fast. */
+  /** Warm the models (STT for speaking, then TTS for hearing) so first use is fast. */
   warm(): void {
-    if (!this.loading) this.loading = this.ensureWhisper().then(() => {}).catch(() => {})
+    if (!this.loading) {
+      this.loading = this.ensureWhisper()
+        .then(() => this.ensureTts())
+        .then(() => {})
+        .catch(() => {})
+    }
   }
 
   async dispose(): Promise<void> {
-    const ids = [this.whisperId, ...this.nmtIds.values()].filter(Boolean) as string[]
+    const ids = [this.whisperId, this.ttsId, ...this.nmtIds.values()].filter(Boolean) as string[]
     for (const id of ids) {
       try {
         await QVAC.unloadModel({ modelId: id })

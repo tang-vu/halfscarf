@@ -149,5 +149,21 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
   peer's UI shows it in their own language. (`payment`, `chat`, `voice` all share the one P2P channel.)
 - **Verified live:** Bob (en) speaks → Alice (es) receives "Hola amigo mío. Bienvenidos a la Copa del
   Mundo. Déjame comprarte una cerveza." Latency (warm, CPU): STT ~1s + translate ~0.35s.
-- **TTS (hearing) not wired in** — Phase 3 delivers translated *text* (brief allows "hears or reads").
-  QVAC TTS is proven (Spike C) and is a Phase 4 stretch (synthesize peer-side, stream audio to browser).
+
+## Phase 4 stretch: peer-side TTS ("hear", not just read) — `verified`
+- **Flow:** peer's `voice` frame arrives (text, over Hyperswarm) → browser shows it instantly →
+  browser POSTs the translated text to `POST /api/hear` (loopback) → `VoiceService.synthesizeSpeech`
+  runs **Supertonic multilingual TTS on-device** in THIS fan's language → returns `audio/wav`
+  (16-bit mono, 44.1 kHz) → browser plays it. Async by design: text first, speech ~2s later.
+- **TTS model loaded once per instance** (language fixed to the fan's own `LANG_CODE` — incoming
+  translated text is always already in it), promise-cached to avoid double-load, warmed on peer
+  connect (after Whisper). Unloaded in `dispose()`.
+- **GOTCHA (cost 1 debug cycle):** at runtime `(await textToSpeech(...).buffer)` is a **plain
+  `number[]`**, NOT an `Int16Array` — the samples cross the Bare-worker RPC boundary and
+  deserialize as a plain Array (`.buffer` is `undefined`). The SDK examples' `createWav`/
+  `int16ArrayToBuffer` tolerate array-likes, so the spike never hit it. Fix: normalize with
+  `Int16Array.from(samples)` before wrapping in a WAV header.
+- **Measured (this machine, CPU):** cold `/api/hear` (model load + synth) ~9.3s; **warm ~2.3s**
+  for a ~3–5s phrase. 200 OK, valid RIFF/WAVE (verified via curl).
+- Browser autoplay: playback needs a prior user gesture — connecting to a room counts, so in
+  practice it just works; on failure the UI degrades to read-only + a one-time "enable audio" toast.

@@ -12,8 +12,9 @@ Built for the **Tether Developers Cup**, combining all three tracks:
 | No reliable network | **Pears** (P2P) | The two fans connect directly over Hyperswarm. No server, no relay. |
 | No common currency | **WDK** (Wallets) | Fans send each other USDt from self-custodial wallets — buy a beer, split a taxi, tip. |
 
-> Status: **Phases 0–3 complete — all three tracks integrated and demoable end to end.** See
-> `PROGRESS.md` for the live build state, `DECISIONS.md` for the verified SDK APIs + measured latency.
+> Status: **Phases 0–4 complete + peer-side TTS — all three tracks integrated and demoable end to
+> end; translations are heard, not just read.** See `PROGRESS.md` for the live build state,
+> `DECISIONS.md` for the verified SDK APIs + measured latency.
 
 ---
 
@@ -68,9 +69,10 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
 
 4. **Talk across the language barrier (Phase 3, on-device QVAC):** once paired, **hold the 🎙️ button**
    and speak your language. Your speech is transcribed + translated on-device (no cloud) and the result
-   appears on the other fan's screen in *their* language, delivered over Hyperswarm. Set each fan's
-   language with `LANG_CODE` (e.g. `es`, `en`). First utterance loads the models (a few seconds), then
-   it's ~1.3s per phrase. Microphone permission is required (works on `http://localhost`).
+   appears on the other fan's screen in *their* language, delivered over Hyperswarm — **and is spoken
+   aloud** on their device (on-device TTS, ~2s after the text). Set each fan's language with `LANG_CODE`
+   (e.g. `es`, `en`). First utterance loads the models (a few seconds), then it's ~1.3s per phrase.
+   Microphone permission is required (works on `http://localhost`).
 
 ## The 3-minute demo — and how it maps to the three tracks
 
@@ -79,13 +81,14 @@ Two fans, two nations, one device each:
 1. **Connect (Pears / P2P).** Both fans type the same room code → they pair over **Hyperswarm**.
    The "🛰️ P2P: connected" badge lights up. No server, no relay — just the DHT.
 2. **Talk (QVAC / Local AI).** Alice 🇦🇷 holds 🎙️ and speaks Spanish → Bob 🏴 reads it in English on
-   his screen (transcribed + translated **on Alice's device**), and vice-versa.
+   his screen **and hears it spoken aloud** (STT + translation on Alice's device, TTS on Bob's —
+   all on-device), and vice-versa.
 3. **Pay (WDK / Wallets).** Bob taps a **🍺 quick-tip** → USDt moves from his self-custodial wallet to
    Alice's, on-chain, and Alice is notified over the same P2P channel.
 
 | Track | See it in the demo | In the code |
 | --- | --- | --- |
-| **QVAC** (Local AI) | push-to-talk → translated-speech banner | `src/voice/`, `POST /api/speak` |
+| **QVAC** (Local AI) | push-to-talk → translated-speech banner + spoken aloud | `src/voice/`, `POST /api/speak`, `POST /api/hear` |
 | **Pears** (P2P) | room-code pairing, "no server" badge, live chat | `src/p2p/peer-link.ts` (Hyperswarm) |
 | **WDK** (Wallets) | balances + quick-tip / send / request USDt | `src/wallet/`, `POST /api/send` |
 

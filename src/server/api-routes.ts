@@ -110,6 +110,18 @@ export function makeApiHandler(
         return true
       }
 
+      // The peer's translated speech arrives as TEXT over Hyperswarm; the browser calls this
+      // so the fan also HEARS it — QVAC TTS synthesizes it in this fan's language, on-device.
+      if (req.method === 'POST' && pathname === '/api/hear') {
+        const body = await readJsonBody(req)
+        const text = String(body.text ?? '').slice(0, 1000).trim()
+        if (!text) throw new Error('text required')
+        const wav = await voice.synthesizeSpeech(text)
+        res.writeHead(200, { 'content-type': 'audio/wav', 'content-length': String(wav.length) })
+        res.end(wav)
+        return true
+      }
+
       // --- payment ---
       if (req.method === 'POST' && pathname === '/api/send') {
         const body = await readJsonBody(req)

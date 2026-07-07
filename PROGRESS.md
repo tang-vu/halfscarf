@@ -19,14 +19,23 @@
 - **Stopping servers:** kill by port (TaskStop/npm orphans the node child):
   `netstat -ano | grep :PORT` → `taskkill //F //PID`.
 - **Open decisions for the user (not done):** (1) record the 3-min demo video (human step);
-  (2) pick an optional stretch if any — peer-side **TTS** (hear vs read) / **QR** pairing / **Pear** packaging.
+  (2) remaining optional stretches — **QR** pairing / **Pear** packaging (peer-side TTS is DONE).
 - **User preference:** replies in Vietnamese (also saved in cross-session memory).
 
 ## Now
-**Phases 0–4 COMPLETE — full product integrated and demoable.** All three tracks work end to end.
-Remaining: record the 3-minute demo video; optional stretches (peer-side TTS "hearing", QR pairing,
-Pear packaging). See end of file for phase roadmap.
+**Phases 0–4 COMPLETE + peer-side TTS stretch DONE — translations are now HEARD, not just read.**
+All three tracks work end to end. Remaining: record the 3-minute demo video; optional stretches
+(QR pairing, Pear packaging). See end of file for phase roadmap.
 
+### Stretch: peer-side TTS (hear the translation)
+When a peer's translated `voice` frame arrives, the text shows instantly and the browser calls
+`POST /api/hear` → Supertonic TTS synthesizes it **on-device in the fan's own language** → WAV plays
+in the browser. Verified live over HTTP: 200 `audio/wav`, valid RIFF; cold ~9.3s (model load), **warm
+~2.3s**. TTS model loaded once, warmed on peer connect. Gotcha found + fixed: TTS samples arrive as a
+plain `number[]` (not `Int16Array`) across the Bare-worker RPC boundary — see DECISIONS.md.
+`npm run typecheck` + `node --check` UI both clean.
+
+### Previously (Phase 4)
 Phase 4 (polish) added: language labels per fan, quick-tip buttons, a prominent translated-speech
 banner, clearer on-device / no-server framing, and a complete README (run steps + 3-min demo script +
 track mapping). `node --check` on the UI + `npm run typecheck` (src) both clean.
@@ -72,6 +81,6 @@ Hyperswarm discovery reliable (first join can miss otherwise). `npm run typechec
       (Remaining human step: record the 3-min video. Optional stretches below.)
 
 ## Optional stretches (not required by the brief)
-- Peer-side **TTS** so the translation is *heard*, not just read (QVAC TTS proven in Spike C).
-- **QR code** for the room code (currently a shared text code).
-- Package as a **Pear app** (`pear run`) — QVAC already runs under Bare, so likely viable.
+- [x] Peer-side **TTS** so the translation is *heard*, not just read. ✅ DONE (see "Now" above).
+- [ ] **QR code** for the room code (currently a shared text code).
+- [ ] Package as a **Pear app** (`pear run`) — QVAC already runs under Bare, so likely viable.

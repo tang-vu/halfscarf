@@ -24,3 +24,6 @@ tmp/
 
 # local agent/editor tooling (not part of the public project)
 .claude/
+
+# per-instance wallet seeds (secrets)
+.data/

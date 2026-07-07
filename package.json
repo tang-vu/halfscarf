@@ -9,6 +9,7 @@
     "node": ">=22.17"
   },
   "scripts": {
+    "start": "tsx src/main.ts",
     "spike:wdk": "tsx spikes/a-wdk-payment.ts",
     "spike:swarm": "tsx spikes/b-hyperswarm.ts",
     "spike:qvac": "tsx spikes/c-qvac-voice.ts",

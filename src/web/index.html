@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>halfscarf</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="scarf">⚽🧣</span> halfscarf</div>
+      <div class="badges">
+        <span class="badge ok">🔒 Self-custodial USDt</span>
+        <span class="badge soon">🛰️ Direct P2P · Phase 2</span>
+        <span class="badge soon">🧠 On-device voice · Phase 3</span>
+      </div>
+    </header>
+
+    <main class="stage">
+      <!-- Left pane: this fan -->
+      <section class="pane you" id="youPane">
+        <div class="flag" id="youFlag">🏳️</div>
+        <div class="who"><span id="youName">Fan</span> · <span class="nation" id="youNation">Nowhere</span></div>
+
+        <div class="balance">
+          <div class="label">USDt balance</div>
+          <div class="amount"><span id="youUsdt">—</span> <span class="ticker">USDT</span></div>
+          <div class="gas">gas: <span id="youEth">—</span> ETH</div>
+        </div>
+
+        <div class="addr-row">
+          <code id="youAddr" class="addr">loading…</code>
+          <button id="copyAddr" class="mini" title="Copy address">copy</button>
+        </div>
+      </section>
+
+      <div class="divider"><div class="pulse" id="netPulse"></div></div>
+
+      <!-- Right pane: the other fan -->
+      <section class="pane peer">
+        <div class="flag muted">🌍</div>
+        <div class="who muted">The other fan</div>
+
+        <form id="sendForm" class="send">
+          <label>Their wallet address
+            <input id="toAddr" placeholder="0x…" autocomplete="off" spellcheck="false" />
+          </label>
+          <label>Amount (USDt)
+            <input id="amount" placeholder="1.5" inputmode="decimal" autocomplete="off" />
+          </label>
+          <button type="submit" id="sendBtn" class="send-btn">Send USDt →</button>
+          <div class="hint">Phase 2 auto-fills this from a P2P room code / QR.</div>
+        </form>
+      </section>
+    </main>
+
+    <section class="log">
+      <div class="log-title">Activity</div>
+      <ul id="logList"><li class="empty">No transfers yet.</li></ul>
+    </section>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

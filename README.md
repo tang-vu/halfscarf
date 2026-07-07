@@ -41,7 +41,28 @@ npm run spike:swarm   # Spike B — Hyperswarm: two peers exchange a message (ru
 npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translate -> language B out
 ```
 
-(The full two-instance demo app arrives in Phase 1+. Run steps will be added here as it lands.)
+## Run the app — two fans (Phase 1)
+
+1. **Set up a testnet USDt token.** Copy `.env.example` to `.env`, then:
+   ```bash
+   npx tsx spikes/gen-dev-wallet.ts      # prints a dev address; fund it with Sepolia ETH (faucet)
+   npx tsx spikes/deploy-test-usdt.ts    # deploys TestUSDT, writes USDT_ADDRESS into .env
+   ```
+   (USDt has no canonical contract on Sepolia, so we deploy a 6-decimal ERC-20 stand-in.)
+
+2. **Start two fans in two terminals** — each opens its own two-pane UI:
+   ```bash
+   INSTANCE=Alice NATION=Argentina FLAG=🇦🇷 LANG_CODE=es PORT=3001 npm start
+   INSTANCE=Bob   NATION=England   FLAG=🏴 LANG_CODE=en PORT=3002 npm start
+   ```
+   Each fan gets a self-custodial wallet (seed in `.data/<name>.seed`, gitignored). Copy one
+   fan's address into the other's "Send USDt" form and send — the balance updates on-chain.
+
+   > Phase 1 note: fund the *sender's* wallet with the token first. `.data/alice.seed` can be set
+   > to the deploy wallet (which holds the initial TestUSDT supply) to demo Alice → Bob.
+
+(Phase 2 replaces pasting addresses with a P2P room code / QR over Hyperswarm; Phase 3 adds
+push-to-talk voice translation.)
 
 ## Repository layout
 

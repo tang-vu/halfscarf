@@ -3,7 +3,11 @@
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
 ## Now
-**Phase 0 COMPLETE — all 3 spikes pass.** Ready to start Phase 1 (payment core app).
+**Phase 1 COMPLETE — payment core app works end to end.** Next: Phase 2 (Hyperswarm P2P pairing).
+
+Two instances (Alice 🇦🇷 / Bob 🏴), each a self-custodial WDK wallet + local two-pane web UI.
+Verified live: Alice sent 25 USDt to Bob via the UI's `/api/send` → Bob balance 0 → 25
+(tx `0x1041c149…4ea154` on Sepolia). App = Node http server (`src/`) serving a vanilla web UI.
 
 ## Done
 - [x] 0.1 Fetched QVAC / Pears / WDK docs; confirmed the three packages exist on npm
@@ -28,8 +32,9 @@
 ## Runtime decision
 - Build on **Node**; QVAC self-spawns a Bare worker for AI. Full Pear packaging is an optional Phase 2/3 stretch.
 
-## Phase roadmap (after Phase 0 passes)
-- [ ] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net).
+## Phase roadmap
+- [x] Phase 0 — Recon & de-risking spikes (WDK, Hyperswarm, QVAC all verified).
+- [x] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net). ✅
 - [ ] Phase 2 — P2P connection over Hyperswarm (room code / QR).
 - [ ] Phase 3 — On-device QVAC voice translation wired into the live P2P session.
 - [ ] Phase 4 — Demo polish (two-pane "two fans, two nations" UI, README repro).

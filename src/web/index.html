@@ -21,6 +21,7 @@
       <section class="pane you">
         <div class="flag" id="youFlag">🏳️</div>
         <div class="who"><span id="youName">Fan</span> · <span class="nation" id="youNation">Nowhere</span></div>
+        <div class="lang" id="youLang">speaks —</div>
         <div class="balance">
           <div class="label">USDt balance</div>
           <div class="amount"><span id="youUsdt">—</span> <span class="ticker">USDT</span></div>
@@ -53,7 +54,15 @@
         <div id="peerCard" class="peer-card" hidden>
           <div class="flag" id="peerFlag">🏳️</div>
           <div class="who"><span id="peerName">—</span> · <span class="nation" id="peerNation">—</span></div>
+          <div class="lang" id="peerLang">speaks —</div>
           <code id="peerAddr" class="addr">—</code>
+
+          <div class="tips">
+            <span class="tips-label">Quick tip:</span>
+            <button type="button" class="tip" data-amt="1">🍺 1</button>
+            <button type="button" class="tip" data-amt="2">2</button>
+            <button type="button" class="tip" data-amt="5">5</button>
+          </div>
 
           <form id="sendForm" class="send">
             <label>Send USDt to <span id="peerNameShort">them</span>
@@ -75,6 +84,14 @@
         </div>
       </section>
     </main>
+
+    <section id="speechBanner" class="speech" hidden>
+      <div class="speech-flag" id="speechFlag">🎙️</div>
+      <div class="speech-body">
+        <div class="speech-meta"><span id="speechName">—</span> · on-device translation</div>
+        <div class="speech-text" id="speechText">—</div>
+      </div>
+    </section>
 
     <section class="log">
       <div class="log-title">Activity</div>

@@ -31,6 +31,23 @@ function toast(msg) {
 
 const short = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '')
 
+const LANG_NAMES = { en: 'English', es: 'Español', fr: 'Français', de: 'Deutsch', pt: 'Português', it: 'Italiano', ar: 'العربية', ja: '日本語', ko: '한국어', zh: '中文' }
+const langName = (c) => LANG_NAMES[c] || (c || '—').toUpperCase()
+
+let speechTimer = null
+function showSpeech(flag, name, text) {
+  $('speechFlag').textContent = flag || '🎙️'
+  $('speechName').textContent = name || 'Peer'
+  $('speechText').textContent = text || ''
+  const b = $('speechBanner')
+  b.hidden = false
+  b.classList.remove('pop')
+  void b.offsetWidth // restart animation
+  b.classList.add('pop')
+  clearTimeout(speechTimer)
+  speechTimer = setTimeout(() => (b.hidden = true), 9000)
+}
+
 function logEntry({ kind, html, href, action }) {
   const list = $('logList')
   const empty = list.querySelector('.empty')
@@ -56,6 +73,7 @@ async function loadConfig() {
   $('youName').textContent = cfg.instance || 'Fan'
   $('youNation').textContent = cfg.nation || ''
   document.title = `${cfg.flag || ''} ${cfg.instance || 'halfscarf'}`
+  $('youLang').textContent = `speaks ${langName(cfg.lang)}`
   if (cfg.room) $('roomCode').value = cfg.room
   if (!cfg.usdtAddress) toast('USDT_ADDRESS not set in .env')
 }
@@ -92,8 +110,9 @@ function showPeer(id) {
   $('peerAddr').textContent = id.address
   $('peerAddr').title = id.address
   $('peerNameShort').textContent = id.name || 'them'
+  $('peerLang').textContent = `speaks ${langName(id.lang)}`
   $('micBtn').disabled = false
-  $('micHint').textContent = `You speak ${cfg.lang} → ${id.name} reads ${id.lang} · on-device (QVAC)`
+  $('micHint').textContent = `You speak ${langName(cfg.lang)} → ${id.name} reads ${langName(id.lang)} · on-device (QVAC)`
 }
 
 // --- P2P event stream (SSE) ---
@@ -123,9 +142,10 @@ function setupSSE() {
       logEntry({ kind: 'recv', html: `💸 Incoming <b>${escapeHtml(m.amount)} USDT</b> from ${escapeHtml(peer ? peer.name : 'peer')}`, href: m.explorer })
       setTimeout(refreshWallet, 1500)
     } else if (m.type === 'voice') {
+      showSpeech(peer ? peer.flag : '🎙️', peer ? peer.name : 'Peer', m.dstText)
       logEntry({
         kind: 'voice',
-        html: `🎙️ <b>${escapeHtml(peer ? peer.name : 'them')} (${escapeHtml(m.srcLang)}):</b> “${escapeHtml(m.srcText)}”<br><span class="xlate">→ you read (${escapeHtml(m.dstLang)}): <b>${escapeHtml(m.dstText)}</b></span>`,
+        html: `🎙️ <b>${escapeHtml(peer ? peer.name : 'them')} (${escapeHtml(langName(m.srcLang))}):</b> “${escapeHtml(m.srcText)}”<br><span class="xlate">→ you hear (${escapeHtml(langName(m.dstLang))}): <b>${escapeHtml(m.dstText)}</b></span>`,
       })
     }
   })
@@ -175,6 +195,14 @@ $('requestBtn').addEventListener('click', async () => {
   await api('/api/request', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ amount }) })
   logEntry({ kind: 'sys', html: `You requested <b>${escapeHtml(amount)} USDT</b> from ${escapeHtml(peer.name)}` })
   toast('Request sent')
+})
+
+document.querySelectorAll('.tip').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (!peer) return toast('No peer connected')
+    $('amount').value = btn.dataset.amt
+    $('sendForm').requestSubmit()
+  })
 })
 
 $('chatForm').addEventListener('submit', async (e) => {

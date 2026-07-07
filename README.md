@@ -12,7 +12,8 @@ Built for the **Tether Developers Cup**, combining all three tracks:
 | No reliable network | **Pears** (P2P) | The two fans connect directly over Hyperswarm. No server, no relay. |
 | No common currency | **WDK** (Wallets) | Fans send each other USDt from self-custodial wallets — buy a beer, split a taxi, tip. |
 
-> Status: **Phase 0 — recon & de-risking spikes.** See `PROGRESS.md` for the live build state.
+> Status: **Phases 0–3 complete — all three tracks integrated and demoable end to end.** See
+> `PROGRESS.md` for the live build state, `DECISIONS.md` for the verified SDK APIs + measured latency.
 
 ---
 
@@ -71,14 +72,41 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
    language with `LANG_CODE` (e.g. `es`, `en`). First utterance loads the models (a few seconds), then
    it's ~1.3s per phrase. Microphone permission is required (works on `http://localhost`).
 
+## The 3-minute demo — and how it maps to the three tracks
+
+Two fans, two nations, one device each:
+
+1. **Connect (Pears / P2P).** Both fans type the same room code → they pair over **Hyperswarm**.
+   The "🛰️ P2P: connected" badge lights up. No server, no relay — just the DHT.
+2. **Talk (QVAC / Local AI).** Alice 🇦🇷 holds 🎙️ and speaks Spanish → Bob 🏴 reads it in English on
+   his screen (transcribed + translated **on Alice's device**), and vice-versa.
+3. **Pay (WDK / Wallets).** Bob taps a **🍺 quick-tip** → USDt moves from his self-custodial wallet to
+   Alice's, on-chain, and Alice is notified over the same P2P channel.
+
+| Track | See it in the demo | In the code |
+| --- | --- | --- |
+| **QVAC** (Local AI) | push-to-talk → translated-speech banner | `src/voice/`, `POST /api/speak` |
+| **Pears** (P2P) | room-code pairing, "no server" badge, live chat | `src/p2p/peer-link.ts` (Hyperswarm) |
+| **WDK** (Wallets) | balances + quick-tip / send / request USDt | `src/wallet/`, `POST /api/send` |
+
+Guarantees: the entire AI path runs on-device (QVAC Bare worker, no cloud); every fan-to-fan byte is
+Hyperswarm; wallets are self-custodial (seeds never leave the device).
+
 ## Repository layout
 
 ```
-spikes/        Throwaway Phase-0 spikes proving each SDK (WDK, Hyperswarm, QVAC)
-src/           Product code (added from Phase 1 onward)
-PROGRESS.md    What's done / what's next  (resume a session from here)
-DECISIONS.md   The REAL SDK APIs discovered, versions, runtime choice, measured latency
-RISKS.md       Open risks
+src/
+  wallet/    WDK self-custodial wallet (address, balances, USDt transfer)
+  p2p/       Hyperswarm P2P transport (pairing, chat, payments, voice frames)
+  voice/     QVAC on-device speech translation (Whisper STT + Bergamot NMT)
+  server/    Node HTTP server + JSON API + loopback SSE bridge
+  web/       two-pane "two fans, two nations" browser UI (vanilla HTML/CSS/JS)
+  config.ts  per-instance config (name, nation, flag, language, wallet seed)
+spikes/      Throwaway Phase-0 spikes proving each SDK + the TestUSDT deploy helper
+contracts/   TestUSDT.sol — 6-decimal ERC-20 USDt stand-in for Sepolia
+PROGRESS.md  What's done / what's next  (resume a session from here)
+DECISIONS.md The REAL SDK APIs discovered, versions, runtime choice, measured latency
+RISKS.md     Open risks
 ```
 
 ## License

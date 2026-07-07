@@ -18,6 +18,11 @@ const MIME: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
 }
 
+// Browser-side libs served from node_modules — an explicit allowlist, never a directory mount.
+const VENDOR: Record<string, string> = {
+  '/vendor/jsqr.js': path.join(WEB_DIR, '..', '..', 'node_modules', 'jsqr', 'dist', 'jsQR.js'),
+}
+
 export function startServer(
   wallet: WalletService,
   cfg: AppConfig,
@@ -35,6 +40,19 @@ export function startServer(
       if (!handled) {
         res.writeHead(404, { 'content-type': 'application/json' })
         res.end(JSON.stringify({ error: 'not found' }))
+      }
+      return
+    }
+
+    const vendor = VENDOR[url.pathname]
+    if (vendor) {
+      try {
+        const buf = await readFile(vendor)
+        res.writeHead(200, { 'content-type': MIME['.js'] })
+        res.end(buf)
+      } catch {
+        res.writeHead(404, { 'content-type': 'text/plain' })
+        res.end('vendor file missing — run npm install')
       }
       return
     }

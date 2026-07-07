@@ -1,6 +1,7 @@
 /** JSON + SSE API for one fan's local UI: wallet state, USDt send, and P2P (Hyperswarm) actions. */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import QRCode from 'qrcode'
 import type { WalletService } from '../wallet/wallet-service.js'
 import type { AppConfig } from '../config.js'
 import type { PeerLink } from '../p2p/peer-link.js'
@@ -70,6 +71,18 @@ export function makeApiHandler(
 
       if (req.method === 'GET' && pathname === '/api/wallet') {
         sendJson(res, 200, await wallet.getInfo())
+        return true
+      }
+
+      // Room code as a scannable QR (SVG) — the other fan scans it instead of typing the code.
+      // Encodes the plain room code text, so any QR reader (incl. our in-app scanner) gets it.
+      if (req.method === 'GET' && pathname === '/api/room-qr') {
+        const url = new URL(req.url || '', 'http://localhost')
+        const room = (url.searchParams.get('room') || '').trim().slice(0, 200)
+        if (!room) throw new Error('room code required')
+        const svg = await QRCode.toString(room, { type: 'svg', margin: 1, width: 220 })
+        res.writeHead(200, { 'content-type': 'image/svg+xml', 'cache-control': 'no-cache' })
+        res.end(svg)
         return true
       }
 

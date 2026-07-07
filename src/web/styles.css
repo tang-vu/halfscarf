@@ -141,3 +141,12 @@ body {
 .speech .speech-text { font-size: 22px; font-weight: 700; margin-top: 2px; }
 .speech.pop { animation: pop 0.35s ease-out; }
 @keyframes pop { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* --- QR pairing: show my room-code QR / scan the other fan's --- */
+.qr-row { justify-content: center; margin-top: 6px; }
+.qr-box { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.qr-box img { width: 170px; height: 170px; border-radius: 12px; border: 6px solid #fff; background: #fff; }
+.scan-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(5, 8, 18, 0.92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.scan-overlay video { width: min(70vw, 480px); border-radius: 16px; border: 2px solid var(--accent); }
+.scan-overlay .scan-hint { font-size: 13px; color: var(--muted); }

@@ -167,3 +167,25 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
   for a ~3–5s phrase. 200 OK, valid RIFF/WAVE (verified via curl).
 - Browser autoplay: playback needs a prior user gesture — connecting to a room counts, so in
   practice it just works; on failure the UI degrades to read-only + a one-time "enable audio" toast.
+
+## Phase 4 stretch: QR pairing — `verified`
+- **Show:** `GET /api/room-qr?room=<code>` renders the room code as an SVG QR server-side
+  (`qrcode@1.5.4`); the UI shows it via `<img src>`. QR payload = the **plain room code text**
+  (device-agnostic; any scanner reads it).
+- **Scan:** 📷 button → `getUserMedia` video → per-frame decode with `jsqr@1.4.0`, **100% local**
+  (native `BarcodeDetector` was rejected: unavailable in desktop Chrome on Windows). On decode:
+  fill room input → auto-submit connect. Accepts a plain code or a URL carrying `?room=`.
+- **Deep link:** `/?room=<code>` auto-fills + connects on page load (scripted demos, zero clicks).
+- jsQR is served to the browser from `node_modules` via an explicit **allowlist route**
+  (`/vendor/jsqr.js` in `http-server.ts`) — no directory mount, repo stays free of vendored blobs.
+- **Verified:** QR endpoint returns valid SVG (400 without a room); encode→decode round-trip
+  (`qrcode` PNG → `jsQR`) returns the exact room code; two live instances still pair over the
+  DHT after the server changes (regression: paired in ~9s).
+
+## Pear packaging — assessed, intentionally NOT done (stay on Node)
+- The pre-agreed bar (brief + RISKS #7): attempt only if friction-free. It is not — this is a
+  **port, not a packaging step**: `pear` runs apps under **Bare**, which has no `node:http`
+  (server + SSE loopback layer), no `node:child_process`; the UI's mic/camera capture relies on
+  a browser served over `http://localhost`. The whole loopback architecture would need an IPC
+  rework, risking a working demo. QVAC inference ALREADY runs under Bare (worker), so the
+  on-device AI story holds without repackaging. Pear runtime is also not installed on this box.

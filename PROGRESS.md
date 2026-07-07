@@ -18,14 +18,23 @@
   → same room code → Connect → hold 🎙️ to talk → 🍺 quick-tip.
 - **Stopping servers:** kill by port (TaskStop/npm orphans the node child):
   `netstat -ano | grep :PORT` → `taskkill //F //PID`.
-- **Open decisions for the user (not done):** (1) record the 3-min demo video (human step);
-  (2) remaining optional stretches — **QR** pairing / **Pear** packaging (peer-side TTS is DONE).
+- **Open decisions for the user (not done):** record the 3-min demo video (human step). All
+  optional stretches are now resolved: peer-side TTS ✅, QR pairing ✅, Pear packaging — assessed
+  and intentionally skipped (it's a port, not packaging; see DECISIONS.md).
 - **User preference:** replies in Vietnamese (also saved in cross-session memory).
 
 ## Now
-**Phases 0–4 COMPLETE + peer-side TTS stretch DONE — translations are now HEARD, not just read.**
-All three tracks work end to end. Remaining: record the 3-minute demo video; optional stretches
-(QR pairing, Pear packaging). See end of file for phase roadmap.
+**Phases 0–4 COMPLETE + all stretches resolved (TTS ✅, QR pairing ✅, Pear assessed-and-skipped).**
+All three tracks work end to end. The ONLY remaining item is the human step: record the 3-minute
+demo video. See end of file for phase roadmap.
+
+### Stretch: QR pairing (+ ?room= deep link)
+Pairing without typing: 🔳 Show QR renders the room code as SVG (`GET /api/room-qr`, `qrcode` pkg);
+📷 Scan QR reads the peer's QR via webcam, decoded locally by `jsqr` (served from node_modules via
+an allowlist route `/vendor/jsqr.js`), then auto-connects. `/?room=CODE` deep link auto-connects on
+load (handy to script the demo). Verified: SVG endpoint ✓, encode→jsQR-decode round-trip ✓, two
+live instances still pair over the DHT (~9s) after the server changes ✓. New UI module
+`src/web/qr-pairing.js` (kept app.js from growing). Stale "Phase 3 · soon" badge fixed.
 
 ### Stretch: peer-side TTS (hear the translation)
 When a peer's translated `voice` frame arrives, the text shows instantly and the browser calls
@@ -80,7 +89,8 @@ Hyperswarm discovery reliable (first join can miss otherwise). `npm run typechec
 - [x] Phase 4 — Demo polish: two-pane UI, language labels, quick-tips, speech banner, README + demo script. ✅
       (Remaining human step: record the 3-min video. Optional stretches below.)
 
-## Optional stretches (not required by the brief)
-- [x] Peer-side **TTS** so the translation is *heard*, not just read. ✅ DONE (see "Now" above).
-- [ ] **QR code** for the room code (currently a shared text code).
-- [ ] Package as a **Pear app** (`pear run`) — QVAC already runs under Bare, so likely viable.
+## Optional stretches (not required by the brief) — all resolved
+- [x] Peer-side **TTS** so the translation is *heard*, not just read. ✅ DONE.
+- [x] **QR code** for the room code (+ `?room=` deep link). ✅ DONE.
+- [x] Package as a **Pear app** — assessed, intentionally NOT done: Bare has no `node:http`, so
+      it's a rearchitecture, not packaging; QVAC inference already runs under Bare. See DECISIONS.md.

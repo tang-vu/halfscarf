@@ -64,6 +64,10 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
    DHT, exchange identity, and each other's pane auto-fills. Now you can chat, **request** USDt, and
    **send** USDt — the send goes on-chain and the peer is notified directly over Hyperswarm.
 
+   No typing needed either: one fan taps **🔳 Show QR**, the other taps **📷 Scan QR** (webcam,
+   decoded locally by jsQR) — the room code fills in and connects automatically. For scripted
+   demos, opening `http://localhost:3001/?room=worldcup-final` auto-connects too.
+
    > Fund the *sender's* wallet with the token first. `.data/alice.seed` can be set to the deploy
    > wallet (which holds the initial TestUSDT supply) to demo Alice → Bob.
 
@@ -78,8 +82,9 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
 
 Two fans, two nations, one device each:
 
-1. **Connect (Pears / P2P).** Both fans type the same room code → they pair over **Hyperswarm**.
-   The "🛰️ P2P: connected" badge lights up. No server, no relay — just the DHT.
+1. **Connect (Pears / P2P).** One fan shows the room-code **QR**, the other **scans** it (or both
+   type the same code) → they pair over **Hyperswarm**. The "🛰️ P2P: connected" badge lights up.
+   No server, no relay — just the DHT.
 2. **Talk (QVAC / Local AI).** Alice 🇦🇷 holds 🎙️ and speaks Spanish → Bob 🏴 reads it in English on
    his screen **and hears it spoken aloud** (STT + translation on Alice's device, TTS on Bob's —
    all on-device), and vice-versa.
@@ -89,7 +94,7 @@ Two fans, two nations, one device each:
 | Track | See it in the demo | In the code |
 | --- | --- | --- |
 | **QVAC** (Local AI) | push-to-talk → translated-speech banner + spoken aloud | `src/voice/`, `POST /api/speak`, `POST /api/hear` |
-| **Pears** (P2P) | room-code pairing, "no server" badge, live chat | `src/p2p/peer-link.ts` (Hyperswarm) |
+| **Pears** (P2P) | QR / room-code pairing, "no server" badge, live chat | `src/p2p/peer-link.ts` (Hyperswarm) |
 | **WDK** (Wallets) | balances + quick-tip / send / request USDt | `src/wallet/`, `POST /api/send` |
 
 Guarantees: the entire AI path runs on-device (QVAC Bare worker, no cloud); every fan-to-fan byte is

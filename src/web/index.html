@@ -12,7 +12,7 @@
       <div class="badges">
         <span class="badge ok">🔒 Self-custodial USDt</span>
         <span class="badge" id="p2pBadge">🛰️ P2P: not connected</span>
-        <span class="badge soon">🧠 On-device voice · Phase 3</span>
+        <span class="badge ok">🧠 On-device voice (QVAC)</span>
       </div>
     </header>
 
@@ -46,8 +46,17 @@
               <input id="roomCode" placeholder="worldcup-final" autocomplete="off" spellcheck="false" />
             </label>
             <button type="submit" id="connectBtn" class="send-btn alt">Connect over P2P →</button>
+            <div class="btn-row qr-row">
+              <button type="button" id="qrShowBtn" class="mini">🔳 Show QR</button>
+              <button type="button" id="qrScanBtn" class="mini">📷 Scan QR</button>
+            </div>
             <div class="hint" id="pairHint">Both fans type the same code. No server — just Hyperswarm.</div>
           </form>
+          <!-- QR of this room code, for the other fan to scan instead of typing -->
+          <div id="qrBox" class="qr-box" hidden>
+            <img id="qrImg" alt="Room code QR" />
+            <div class="hint">Let the other fan scan this — same room, zero typing.</div>
+          </div>
         </div>
 
         <!-- Connected peer card (hidden until identity arrives) -->
@@ -85,6 +94,13 @@
       </section>
     </main>
 
+    <!-- Camera overlay for scanning the other fan's room-code QR (decoded locally by jsQR) -->
+    <div id="scanOverlay" class="scan-overlay" hidden>
+      <video id="scanVideo" playsinline muted></video>
+      <div class="scan-hint">Point the camera at the other fan's QR…</div>
+      <button type="button" id="scanCloseBtn" class="mini">✕ Cancel</button>
+    </div>
+
     <section id="speechBanner" class="speech" hidden>
       <div class="speech-flag" id="speechFlag">🎙️</div>
       <div class="speech-body">
@@ -98,6 +114,8 @@
       <ul id="logList"><li class="empty">No activity yet.</li></ul>
     </section>
 
+    <script src="/vendor/jsqr.js"></script>
+    <script src="/qr-pairing.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>

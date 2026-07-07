@@ -143,6 +143,9 @@ body {
 @keyframes pop { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 /* --- QR pairing: show my room-code QR / scan the other fan's --- */
+/* The [hidden] attribute must always win: the rules below set display:flex, which would
+   otherwise override the UA's [hidden]{display:none} and leave the overlay covering the page. */
+[hidden] { display: none !important; }
 .qr-row { justify-content: center; margin-top: 6px; }
 .qr-box { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .qr-box img { width: 170px; height: 170px; border-radius: 12px; border: 6px solid #fff; background: #fff; }

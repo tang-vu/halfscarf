@@ -13,6 +13,7 @@ import { exec } from 'node:child_process'
 import { loadConfig } from './config.js'
 import { WalletService } from './wallet/wallet-service.js'
 import { PeerLink } from './p2p/peer-link.js'
+import { VoiceService } from './voice/voice-service.js'
 import { SseHub } from './server/sse.js'
 import { startServer } from './server/http-server.js'
 
@@ -42,5 +43,11 @@ const peer = new PeerLink({ name: cfg.instance, nation: cfg.nation, flag: cfg.fl
 peer.on('status', (s) => sse.send('p2p-status', s))
 peer.on('message', (m) => sse.send('peer-message', m))
 
-startServer(wallet, cfg, peer, sse)
+// On-device voice translation (QVAC). Warm the STT model once a peer connects.
+const voice = new VoiceService(cfg.lang)
+peer.on('status', (s: { state: string }) => {
+  if (s.state === 'connected') voice.warm()
+})
+
+startServer(wallet, cfg, peer, sse, voice)
 openBrowser(`http://localhost:${cfg.port}`)

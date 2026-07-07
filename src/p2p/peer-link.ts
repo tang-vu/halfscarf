@@ -13,7 +13,7 @@
 import { createHash } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import type { Duplex } from 'node:stream'
-import Hyperswarm from 'hyperswarm'
+import Hyperswarm, { type PeerDiscovery } from 'hyperswarm'
 
 export interface PeerIdentity {
   name: string
@@ -29,6 +29,7 @@ export type WireMessage =
   | { type: 'chat'; text: string }
   | { type: 'payment-request'; amount: string; note?: string }
   | { type: 'payment-sent'; hash: string; amount: string; explorer: string }
+  | { type: 'voice'; srcText: string; dstText: string; srcLang: string; dstLang: string }
 
 /**
  * Events emitted:
@@ -37,9 +38,12 @@ export type WireMessage =
  */
 export class PeerLink extends EventEmitter {
   private swarm: Hyperswarm | null = null
+  private discovery: PeerDiscovery | null = null
+  private reannounce: ReturnType<typeof setInterval> | null = null
   private sockets = new Set<Duplex>()
   private inbufs = new Map<Duplex, string>()
   private room = ''
+  private peer: PeerIdentity | null = null
 
   constructor(private me: PeerIdentity) {
     super()
@@ -51,6 +55,10 @@ export class PeerLink extends EventEmitter {
   get peerCount(): number {
     return this.sockets.size
   }
+  /** The connected peer's identity (incl. their language), captured from their 'identity' frame. */
+  get peerIdentity(): PeerIdentity | null {
+    return this.peer
+  }
 
   /** Join (or switch to) a room. Both fans call this with the same code to find each other. */
   async join(roomCode: string): Promise<void> {
@@ -60,11 +68,22 @@ export class PeerLink extends EventEmitter {
     const swarm = new Hyperswarm()
     this.swarm = swarm
     swarm.on('connection', (socket) => this.onConnection(socket))
-    swarm.join(topic, { server: true, client: true })
+    this.discovery = swarm.join(topic, { server: true, client: true })
     this.emit('status', { state: 'joining', room: roomCode, peers: 0 })
+
+    // DHT discovery can miss on the first announce; re-announce until a peer connects.
+    this.reannounce = setInterval(() => {
+      if (this.sockets.size === 0) this.discovery?.refresh({ client: true, server: true }).catch(() => {})
+    }, 7000)
+  }
+
+  private stopReannounce(): void {
+    if (this.reannounce) clearInterval(this.reannounce)
+    this.reannounce = null
   }
 
   private onConnection(socket: Duplex): void {
+    this.stopReannounce()
     this.sockets.add(socket)
     this.inbufs.set(socket, '')
 
@@ -75,6 +94,7 @@ export class PeerLink extends EventEmitter {
     socket.on('close', () => {
       this.sockets.delete(socket)
       this.inbufs.delete(socket)
+      if (this.sockets.size === 0) this.peer = null
       this.emit('status', {
         state: this.sockets.size ? 'connected' : 'disconnected',
         room: this.room,
@@ -95,7 +115,9 @@ export class PeerLink extends EventEmitter {
       buf = buf.slice(nl + 1)
       if (!line) continue
       try {
-        this.emit('message', JSON.parse(line) as WireMessage)
+        const msg = JSON.parse(line) as WireMessage
+        if (msg.type === 'identity') this.peer = msg
+        this.emit('message', msg)
       } catch {
         /* skip malformed frame */
       }
@@ -117,10 +139,13 @@ export class PeerLink extends EventEmitter {
   }
 
   async leave(): Promise<void> {
+    this.stopReannounce()
     const swarm = this.swarm
     this.swarm = null
+    this.discovery = null
     this.sockets.clear()
     this.inbufs.clear()
+    this.peer = null
     if (swarm) await swarm.destroy().catch(() => {})
   }
 }

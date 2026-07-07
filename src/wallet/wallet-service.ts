@@ -26,20 +26,30 @@ export interface TransferResult {
   explorer: string
 }
 
+// The WDK type declarations expose the account as IWalletAccountWithProtocols, whose concrete
+// read/write methods (getAddress, getBalance, getTokenBalance, transfer — all verified live in
+// Spike A) are not surfaced on that interface. Use a structural alias for the methods we call.
+interface EvmAccount {
+  getAddress(): Promise<string>
+  getBalance(): Promise<bigint>
+  getTokenBalance(tokenAddress: string): Promise<bigint>
+  transfer(opts: { token: string; recipient: string; amount: bigint }): Promise<{ hash: string; fee: bigint }>
+}
+
 export class WalletService {
   private wdk: WDK
-  private account: Awaited<ReturnType<WDK['getAccount']>> | null = null
+  private account: EvmAccount | null = null
 
   constructor(private cfg: AppConfig) {
     this.wdk = new WDK(cfg.seed).registerWallet(CHAIN, WalletManagerEvm, { provider: cfg.rpcUrl })
   }
 
   async init(): Promise<this> {
-    this.account = await this.wdk.getAccount(CHAIN, 0)
+    this.account = (await this.wdk.getAccount(CHAIN, 0)) as unknown as EvmAccount
     return this
   }
 
-  private get acct() {
+  private get acct(): EvmAccount {
     if (!this.account) throw new Error('WalletService not initialised — call init() first')
     return this.account
   }

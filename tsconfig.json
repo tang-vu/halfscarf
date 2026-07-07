@@ -12,5 +12,6 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["spikes/**/*.ts", "src/**/*.ts"]
+  "comment": "typecheck targets the product (src). The Phase-0 spikes are throwaway and run via tsx.",
+  "include": ["src/**/*.ts"]
 }

@@ -134,3 +134,20 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
   peer is notified directly over Hyperswarm (no chain polling needed for the "you got paid" UX).
 - **Op note:** stopping `npm start` via TaskStop orphans the child `node` (port stays bound → EADDRINUSE on
   restart). Kill by port: `netstat -ano | grep :PORT` → `taskkill //F //PID`.
+- **Discovery robustness:** a first `swarm.join` sometimes doesn't find the peer. `PeerLink` re-announces
+  (`discovery.refresh({client,server})`) every 7s until connected — makes cold pairing reliable.
+
+## Phase 3 architecture (on-device voice in the P2P session) — `verified`
+- **Capture (browser):** push-to-talk → `getUserMedia` → Web Audio `ScriptProcessor` collects Float32 →
+  downsample to **16 kHz mono**, convert to Int16 PCM → POST raw bytes to `/api/speak` (loopback).
+  No browser speechSynthesis / cloud STT — keeps the AI path 100% QVAC.
+- **Translate (server, `src/voice/voice-service.ts`):** wrap PCM in a WAV header → QVAC `transcribe`
+  (Whisper, fan's `LANG_CODE`) → QVAC `translate` (Bergamot, fan lang → **peer's** lang from their
+  identity frame). Whisper + per-pair NMT models are loaded once and reused; warmed on peer connect.
+  Model constant picked dynamically: `BERGAMOT_<FROM>_<TO>` (es↔en both present).
+- **Deliver:** server broadcasts a `voice` frame `{srcText,dstText,srcLang,dstLang}` over Hyperswarm; the
+  peer's UI shows it in their own language. (`payment`, `chat`, `voice` all share the one P2P channel.)
+- **Verified live:** Bob (en) speaks → Alice (es) receives "Hola amigo mío. Bienvenidos a la Copa del
+  Mundo. Déjame comprarte una cerveza." Latency (warm, CPU): STT ~1s + translate ~0.35s.
+- **TTS (hearing) not wired in** — Phase 3 delivers translated *text* (brief allows "hears or reads").
+  QVAC TTS is proven (Spike C) and is a Phase 4 stretch (synthesize peer-side, stream audio to browser).

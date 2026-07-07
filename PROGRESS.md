@@ -3,13 +3,14 @@
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
 ## Now
-**Phase 2 COMPLETE — P2P fan connection over Hyperswarm works.** Next: Phase 3 (QVAC voice in the P2P session).
+**Phase 3 COMPLETE — on-device voice translation wired into the live P2P session.** Next: Phase 4 (demo polish).
 
-Two fans pair by a shared room code (`sha256` → Hyperswarm topic), then exchange identity, chat,
-payment requests, and payment notifications **directly over Hyperswarm — no server**. The browser
-gets live peer events via a loopback SSE bridge (`/api/events`); fan-to-fan transport is Hyperswarm only.
-Verified: Alice 🇦🇷 ↔ Bob 🏴 connected in ~7s, exchanged chat + payment-request + a live 10 USDt payment
-(tx `0xe3c0…426d`). Peer identity auto-fills the send form (no more pasting addresses).
+Push-to-talk in the browser → capture mic, downsample to 16 kHz PCM → `/api/speak` → QVAC STT (fan's
+language) + Bergamot translate (→ peer's language), all on-device (Bare worker) → the translated text is
+pushed to the peer over Hyperswarm as a `voice` frame. Verified end-to-end: Bob 🏴 speaks English →
+Alice 🇦🇷 receives "Hola amigo mío. Bienvenidos a la Copa del Mundo…" over the P2P channel. Language
+pair driven by each fan's `LANG_CODE` (es↔en both verified present). Added a re-announce loop to make
+Hyperswarm discovery reliable (first join can miss otherwise). `npm run typecheck` clean for `src/`.
 
 ## Done
 - [x] 0.1 Fetched QVAC / Pears / WDK docs; confirmed the three packages exist on npm
@@ -38,5 +39,5 @@ Verified: Alice 🇦🇷 ↔ Bob 🏴 connected in ~7s, exchanged chat + payment
 - [x] Phase 0 — Recon & de-risking spikes (WDK, Hyperswarm, QVAC all verified).
 - [x] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net). ✅
 - [x] Phase 2 — P2P connection over Hyperswarm (room code). Chat + payment requests + payments, no server. ✅
-- [ ] Phase 3 — On-device QVAC voice translation wired into the live P2P session.
-- [ ] Phase 4 — Demo polish (two-pane "two fans, two nations" UI, README repro).
+- [x] Phase 3 — On-device QVAC voice translation wired into the live P2P session (push-to-talk → STT+translate → peer). ✅
+- [ ] Phase 4 — Demo polish (two-pane "two fans, two nations" UI, README repro, 3-min video).

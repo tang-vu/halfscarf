@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { WalletService } from '../wallet/wallet-service.js'
 import type { AppConfig } from '../config.js'
 import type { PeerLink } from '../p2p/peer-link.js'
+import type { VoiceService } from '../voice/voice-service.js'
 import type { SseHub } from './sse.js'
 
 function sendJson(res: ServerResponse, code: number, body: unknown): void {
@@ -23,11 +24,28 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
   return JSON.parse(Buffer.concat(chunks).toString('utf8'))
 }
 
+async function readRawBody(req: IncomingMessage): Promise<Buffer> {
+  const chunks: Buffer[] = []
+  let size = 0
+  for await (const chunk of req) {
+    size += chunk.length
+    if (size > 20_000_000) throw new Error('audio too large')
+    chunks.push(chunk as Buffer)
+  }
+  return Buffer.concat(chunks)
+}
+
 /**
  * Returns an async handler for /api/* routes. Resolves true if it handled the request
  * (including SSE, which stays open), false if the path is not an API route.
  */
-export function makeApiHandler(wallet: WalletService, cfg: AppConfig, peer: PeerLink, sse: SseHub) {
+export function makeApiHandler(
+  wallet: WalletService,
+  cfg: AppConfig,
+  peer: PeerLink,
+  sse: SseHub,
+  voice: VoiceService,
+) {
   return async function handle(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
     try {
       // Server-Sent Events stream for live P2P updates (kept open).
@@ -77,6 +95,18 @@ export function makeApiHandler(wallet: WalletService, cfg: AppConfig, peer: Peer
         const body = await readJsonBody(req)
         peer.broadcast({ type: 'payment-request', amount: String(body.amount ?? ''), note: String(body.note ?? '') })
         sendJson(res, 200, { ok: true })
+        return true
+      }
+
+      // --- QVAC on-device voice translation ---
+      // Body is raw 16 kHz mono Int16 PCM (captured + downsampled in the browser). We STT +
+      // translate on-device into the peer's language, then push the result over Hyperswarm.
+      if (req.method === 'POST' && pathname === '/api/speak') {
+        const pcm = await readRawBody(req)
+        const dstLang = peer.peerIdentity?.lang || cfg.lang
+        const { srcText, dstText } = await voice.translateSpeech(pcm, dstLang)
+        if (srcText) peer.broadcast({ type: 'voice', srcText, dstText, srcLang: cfg.lang, dstLang })
+        sendJson(res, 200, { srcText, dstText, srcLang: cfg.lang, dstLang })
         return true
       }
 

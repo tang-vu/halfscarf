@@ -92,6 +92,8 @@ function showPeer(id) {
   $('peerAddr').textContent = id.address
   $('peerAddr').title = id.address
   $('peerNameShort').textContent = id.name || 'them'
+  $('micBtn').disabled = false
+  $('micHint').textContent = `You speak ${cfg.lang} → ${id.name} reads ${id.lang} · on-device (QVAC)`
 }
 
 // --- P2P event stream (SSE) ---
@@ -120,6 +122,11 @@ function setupSSE() {
     } else if (m.type === 'payment-sent') {
       logEntry({ kind: 'recv', html: `💸 Incoming <b>${escapeHtml(m.amount)} USDT</b> from ${escapeHtml(peer ? peer.name : 'peer')}`, href: m.explorer })
       setTimeout(refreshWallet, 1500)
+    } else if (m.type === 'voice') {
+      logEntry({
+        kind: 'voice',
+        html: `🎙️ <b>${escapeHtml(peer ? peer.name : 'them')} (${escapeHtml(m.srcLang)}):</b> “${escapeHtml(m.srcText)}”<br><span class="xlate">→ you read (${escapeHtml(m.dstLang)}): <b>${escapeHtml(m.dstText)}</b></span>`,
+      })
     }
   })
 }
@@ -188,6 +195,96 @@ $('copyAddr').addEventListener('click', async () => {
     toast(myAddress)
   }
 })
+
+// --- push-to-talk: capture mic, downsample to 16 kHz mono PCM, send for on-device translation ---
+let audioCtx, mediaStream, procNode, srcNode, recChunks = [], recording = false, recRate = 16000
+
+function downsampleTo16k(input, srcRate) {
+  if (srcRate === 16000) return input
+  const ratio = srcRate / 16000
+  const outLen = Math.floor(input.length / ratio)
+  const out = new Float32Array(outLen)
+  for (let i = 0; i < outLen; i++) {
+    const idx = i * ratio
+    const i0 = Math.floor(idx)
+    const i1 = Math.min(i0 + 1, input.length - 1)
+    out[i] = input[i0] + (input[i1] - input[i0]) * (idx - i0)
+  }
+  return out
+}
+function floatToInt16(f) {
+  const out = new Int16Array(f.length)
+  for (let i = 0; i < f.length; i++) {
+    const s = Math.max(-1, Math.min(1, f[i]))
+    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff
+  }
+  return out
+}
+
+async function startRec() {
+  if (recording || !peer || $('micBtn').disabled) return
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true } })
+  } catch {
+    toast('Microphone blocked')
+    return
+  }
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+  recRate = audioCtx.sampleRate
+  srcNode = audioCtx.createMediaStreamSource(mediaStream)
+  procNode = audioCtx.createScriptProcessor(4096, 1, 1)
+  const mute = audioCtx.createGain()
+  mute.gain.value = 0
+  recChunks = []
+  procNode.onaudioprocess = (e) => recChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)))
+  srcNode.connect(procNode)
+  procNode.connect(mute)
+  mute.connect(audioCtx.destination)
+  recording = true
+  const b = $('micBtn')
+  b.classList.add('rec')
+  b.textContent = '● Recording… release to send'
+}
+
+async function stopRec() {
+  if (!recording) return
+  recording = false
+  const b = $('micBtn')
+  b.classList.remove('rec')
+  try { procNode.disconnect(); srcNode.disconnect() } catch {}
+  mediaStream.getTracks().forEach((t) => t.stop())
+  await audioCtx.close().catch(() => {})
+
+  const total = recChunks.reduce((n, c) => n + c.length, 0)
+  const flat = new Float32Array(total)
+  let o = 0
+  for (const c of recChunks) { flat.set(c, o); o += c.length }
+  if (total < recRate * 0.3) { b.textContent = '🎙️ Hold to talk'; toast('Too short'); return }
+
+  const pcm = floatToInt16(downsampleTo16k(flat, recRate))
+  b.disabled = true
+  b.textContent = '🧠 Translating on-device…'
+  try {
+    const res = await fetch('/api/speak', { method: 'POST', headers: { 'content-type': 'application/octet-stream' }, body: pcm.buffer })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'speak failed')
+    logEntry({
+      kind: 'voice',
+      html: `🎙️ <b>You (${escapeHtml(data.srcLang)}):</b> “${escapeHtml(data.srcText || '(silence)')}”<br><span class="xlate">→ ${escapeHtml(peer ? peer.name : 'peer')} hears (${escapeHtml(data.dstLang)}): <b>${escapeHtml(data.dstText)}</b></span>`,
+    })
+  } catch (err) {
+    toast(err.message)
+  } finally {
+    b.disabled = false
+    b.textContent = '🎙️ Hold to talk'
+  }
+}
+
+const micBtn = $('micBtn')
+micBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); startRec() })
+micBtn.addEventListener('pointerup', (e) => { e.preventDefault(); stopRec() })
+micBtn.addEventListener('pointerleave', () => { if (recording) stopRec() })
+micBtn.addEventListener('pointercancel', () => { if (recording) stopRec() })
 
 // boot
 loadConfig().then(refreshWallet)

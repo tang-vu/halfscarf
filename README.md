@@ -65,7 +65,11 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
    > Fund the *sender's* wallet with the token first. `.data/alice.seed` can be set to the deploy
    > wallet (which holds the initial TestUSDT supply) to demo Alice → Bob.
 
-(Phase 3 adds push-to-talk on-device voice translation into this same P2P session.)
+4. **Talk across the language barrier (Phase 3, on-device QVAC):** once paired, **hold the 🎙️ button**
+   and speak your language. Your speech is transcribed + translated on-device (no cloud) and the result
+   appears on the other fan's screen in *their* language, delivered over Hyperswarm. Set each fan's
+   language with `LANG_CODE` (e.g. `es`, `en`). First utterance loads the models (a few seconds), then
+   it's ~1.3s per phrase. Microphone permission is required (works on `http://localhost`).
 
 ## Repository layout
 

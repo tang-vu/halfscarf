@@ -122,3 +122,15 @@ as `verified` (read from installed types/README or ran it) vs `from docs` (not y
 - Because QVAC + WDK both ship `bare` entry points and QVAC's heavy lifting runs under Bare, **full Pear
   packaging (whole app under `pear run`) is a viable Phase 2/3 stretch** — attempt only if friction-free
   (per brief), otherwise stay on Node. No blocker either way.
+
+## Phase 2 architecture (P2P) — `verified`
+- **Transport = Hyperswarm only** (guardrail). `src/p2p/peer-link.ts`: room code → `sha256` → 32-byte topic
+  → `swarm.join(topic,{server,client})`; on connection, exchange **newline-delimited JSON** frames over the
+  Noise duplex. Message types: `identity`, `chat`, `payment-request`, `payment-sent`.
+- **Browser ↔ its own Node process = loopback only** (not a fan-to-fan relay): server→browser via **SSE**
+  (`/api/events`, `src/server/sse.ts`), browser→server via POST (`/api/connect|message|request|send`).
+  No socket.io, no WebRTC, no signalling server — pairing + transport are 100% Hyperswarm.
+- On `/api/send`, after the on-chain USDt transfer the server also `broadcast`s a `payment-sent` frame so the
+  peer is notified directly over Hyperswarm (no chain polling needed for the "you got paid" UX).
+- **Op note:** stopping `npm start` via TaskStop orphans the child `node` (port stays bound → EADDRINUSE on
+  restart). Kill by port: `netstat -ano | grep :PORT` → `taskkill //F //PID`.

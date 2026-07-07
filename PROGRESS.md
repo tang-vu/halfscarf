@@ -3,11 +3,13 @@
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
 ## Now
-**Phase 1 COMPLETE — payment core app works end to end.** Next: Phase 2 (Hyperswarm P2P pairing).
+**Phase 2 COMPLETE — P2P fan connection over Hyperswarm works.** Next: Phase 3 (QVAC voice in the P2P session).
 
-Two instances (Alice 🇦🇷 / Bob 🏴), each a self-custodial WDK wallet + local two-pane web UI.
-Verified live: Alice sent 25 USDt to Bob via the UI's `/api/send` → Bob balance 0 → 25
-(tx `0x1041c149…4ea154` on Sepolia). App = Node http server (`src/`) serving a vanilla web UI.
+Two fans pair by a shared room code (`sha256` → Hyperswarm topic), then exchange identity, chat,
+payment requests, and payment notifications **directly over Hyperswarm — no server**. The browser
+gets live peer events via a loopback SSE bridge (`/api/events`); fan-to-fan transport is Hyperswarm only.
+Verified: Alice 🇦🇷 ↔ Bob 🏴 connected in ~7s, exchanged chat + payment-request + a live 10 USDt payment
+(tx `0xe3c0…426d`). Peer identity auto-fills the send form (no more pasting addresses).
 
 ## Done
 - [x] 0.1 Fetched QVAC / Pears / WDK docs; confirmed the three packages exist on npm
@@ -35,6 +37,6 @@ Verified live: Alice sent 25 USDt to Bob via the UI's `/api/send` → Bob balanc
 ## Phase roadmap
 - [x] Phase 0 — Recon & de-risking spikes (WDK, Hyperswarm, QVAC all verified).
 - [x] Phase 1 — Payment core: two instances, two wallets, send USDt via UI (Jul 8 safety net). ✅
-- [ ] Phase 2 — P2P connection over Hyperswarm (room code / QR).
+- [x] Phase 2 — P2P connection over Hyperswarm (room code). Chat + payment requests + payments, no server. ✅
 - [ ] Phase 3 — On-device QVAC voice translation wired into the live P2P session.
 - [ ] Phase 4 — Demo polish (two-pane "two fans, two nations" UI, README repro).

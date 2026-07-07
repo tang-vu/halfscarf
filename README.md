@@ -55,14 +55,17 @@ npm run spike:qvac    # Spike C — QVAC: audio in language A -> STT -> translat
    INSTANCE=Alice NATION=Argentina FLAG=🇦🇷 LANG_CODE=es PORT=3001 npm start
    INSTANCE=Bob   NATION=England   FLAG=🏴 LANG_CODE=en PORT=3002 npm start
    ```
-   Each fan gets a self-custodial wallet (seed in `.data/<name>.seed`, gitignored). Copy one
-   fan's address into the other's "Send USDt" form and send — the balance updates on-chain.
+   Each fan gets a self-custodial wallet (seed in `.data/<name>.seed`, gitignored).
 
-   > Phase 1 note: fund the *sender's* wallet with the token first. `.data/alice.seed` can be set
-   > to the deploy wallet (which holds the initial TestUSDT supply) to demo Alice → Bob.
+3. **Pair the two fans (Phase 2, over Hyperswarm — no server):** in both UIs type the **same room
+   code** (e.g. `worldcup-final`) and hit *Connect over P2P*. They find each other on the Hyperswarm
+   DHT, exchange identity, and each other's pane auto-fills. Now you can chat, **request** USDt, and
+   **send** USDt — the send goes on-chain and the peer is notified directly over Hyperswarm.
 
-(Phase 2 replaces pasting addresses with a P2P room code / QR over Hyperswarm; Phase 3 adds
-push-to-talk voice translation.)
+   > Fund the *sender's* wallet with the token first. `.data/alice.seed` can be set to the deploy
+   > wallet (which holds the initial TestUSDT supply) to demo Alice → Bob.
+
+(Phase 3 adds push-to-talk on-device voice translation into this same P2P session.)
 
 ## Repository layout
 

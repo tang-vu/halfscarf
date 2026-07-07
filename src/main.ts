@@ -12,6 +12,8 @@
 import { exec } from 'node:child_process'
 import { loadConfig } from './config.js'
 import { WalletService } from './wallet/wallet-service.js'
+import { PeerLink } from './p2p/peer-link.js'
+import { SseHub } from './server/sse.js'
 import { startServer } from './server/http-server.js'
 
 function openBrowser(url: string): void {
@@ -34,5 +36,11 @@ const wallet = await new WalletService(cfg).init()
 const address = await wallet.getAddress()
 console.log(`[main] ${cfg.flag} ${cfg.instance} (${cfg.nation}) wallet: ${address}`)
 
-startServer(wallet, cfg)
+// P2P transport (Hyperswarm) + a loopback SSE bridge to push peer events to the browser.
+const sse = new SseHub()
+const peer = new PeerLink({ name: cfg.instance, nation: cfg.nation, flag: cfg.flag, lang: cfg.lang, address })
+peer.on('status', (s) => sse.send('p2p-status', s))
+peer.on('message', (m) => sse.send('peer-message', m))
+
+startServer(wallet, cfg, peer, sse)
 openBrowser(`http://localhost:${cfg.port}`)

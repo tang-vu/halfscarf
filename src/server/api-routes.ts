@@ -1,8 +1,10 @@
-/** JSON API for one fan's local UI: read wallet state, send USDt. All server-side (Node + WDK). */
+/** JSON + SSE API for one fan's local UI: wallet state, USDt send, and P2P (Hyperswarm) actions. */
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { WalletService } from '../wallet/wallet-service.js'
 import type { AppConfig } from '../config.js'
+import type { PeerLink } from '../p2p/peer-link.js'
+import type { SseHub } from './sse.js'
 
 function sendJson(res: ServerResponse, code: number, body: unknown): void {
   res.writeHead(code, { 'content-type': 'application/json' })
@@ -22,12 +24,18 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
 }
 
 /**
- * Returns an async handler for /api/* routes. Resolves true if it handled the request,
- * false if the path is not an API route (so the caller can fall through to static files).
+ * Returns an async handler for /api/* routes. Resolves true if it handled the request
+ * (including SSE, which stays open), false if the path is not an API route.
  */
-export function makeApiHandler(wallet: WalletService, cfg: AppConfig) {
+export function makeApiHandler(wallet: WalletService, cfg: AppConfig, peer: PeerLink, sse: SseHub) {
   return async function handle(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
     try {
+      // Server-Sent Events stream for live P2P updates (kept open).
+      if (req.method === 'GET' && pathname === '/api/events') {
+        sse.add(res)
+        return true
+      }
+
       if (req.method === 'GET' && pathname === '/api/config') {
         sendJson(res, 200, {
           instance: cfg.instance,
@@ -36,20 +44,54 @@ export function makeApiHandler(wallet: WalletService, cfg: AppConfig) {
           lang: cfg.lang,
           usdtDecimals: cfg.usdtDecimals,
           usdtAddress: cfg.usdtAddress,
+          room: peer.roomCode,
+          peers: peer.peerCount,
         })
         return true
       }
+
       if (req.method === 'GET' && pathname === '/api/wallet') {
         sendJson(res, 200, await wallet.getInfo())
         return true
       }
+
+      // --- P2P (Hyperswarm) ---
+      if (req.method === 'POST' && pathname === '/api/connect') {
+        const body = await readJsonBody(req)
+        const room = String(body.room ?? '').trim()
+        if (!room) throw new Error('room code required')
+        await peer.join(room)
+        sendJson(res, 200, { ok: true, room })
+        return true
+      }
+
+      if (req.method === 'POST' && pathname === '/api/message') {
+        const body = await readJsonBody(req)
+        const text = String(body.text ?? '').slice(0, 2000)
+        if (text) peer.broadcast({ type: 'chat', text })
+        sendJson(res, 200, { ok: true })
+        return true
+      }
+
+      if (req.method === 'POST' && pathname === '/api/request') {
+        const body = await readJsonBody(req)
+        peer.broadcast({ type: 'payment-request', amount: String(body.amount ?? ''), note: String(body.note ?? '') })
+        sendJson(res, 200, { ok: true })
+        return true
+      }
+
+      // --- payment ---
       if (req.method === 'POST' && pathname === '/api/send') {
         const body = await readJsonBody(req)
         const to = String(body.to ?? '')
         const amount = String(body.amount ?? '')
-        sendJson(res, 200, await wallet.sendUsdt(to, amount))
+        const result = await wallet.sendUsdt(to, amount)
+        // Tell the peer directly over Hyperswarm that we paid them.
+        peer.broadcast({ type: 'payment-sent', hash: result.hash, amount, explorer: result.explorer })
+        sendJson(res, 200, result)
         return true
       }
+
       return false
     } catch (err) {
       sendJson(res, 400, { error: (err as Error).message })

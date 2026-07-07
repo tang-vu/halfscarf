@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import type { WalletService } from '../wallet/wallet-service.js'
 import type { AppConfig } from '../config.js'
+import type { PeerLink } from '../p2p/peer-link.js'
+import type { SseHub } from './sse.js'
 import { makeApiHandler } from './api-routes.js'
 
 const WEB_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'web')
@@ -15,8 +17,8 @@ const MIME: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
 }
 
-export function startServer(wallet: WalletService, cfg: AppConfig): Server {
-  const api = makeApiHandler(wallet, cfg)
+export function startServer(wallet: WalletService, cfg: AppConfig, peer: PeerLink, sse: SseHub): Server {
+  const api = makeApiHandler(wallet, cfg, peer, sse)
 
   const server = createServer(async (req, res) => {
     const url = new URL(req.url || '/', `http://localhost:${cfg.port}`)

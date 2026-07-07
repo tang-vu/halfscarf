@@ -11,23 +11,21 @@
       <div class="brand"><span class="scarf">⚽🧣</span> halfscarf</div>
       <div class="badges">
         <span class="badge ok">🔒 Self-custodial USDt</span>
-        <span class="badge soon">🛰️ Direct P2P · Phase 2</span>
+        <span class="badge" id="p2pBadge">🛰️ P2P: not connected</span>
         <span class="badge soon">🧠 On-device voice · Phase 3</span>
       </div>
     </header>
 
     <main class="stage">
       <!-- Left pane: this fan -->
-      <section class="pane you" id="youPane">
+      <section class="pane you">
         <div class="flag" id="youFlag">🏳️</div>
         <div class="who"><span id="youName">Fan</span> · <span class="nation" id="youNation">Nowhere</span></div>
-
         <div class="balance">
           <div class="label">USDt balance</div>
           <div class="amount"><span id="youUsdt">—</span> <span class="ticker">USDT</span></div>
           <div class="gas">gas: <span id="youEth">—</span> ETH</div>
         </div>
-
         <div class="addr-row">
           <code id="youAddr" class="addr">loading…</code>
           <button id="copyAddr" class="mini" title="Copy address">copy</button>
@@ -36,27 +34,48 @@
 
       <div class="divider"><div class="pulse" id="netPulse"></div></div>
 
-      <!-- Right pane: the other fan -->
+      <!-- Right pane: the other fan (over Hyperswarm) -->
       <section class="pane peer">
-        <div class="flag muted">🌍</div>
-        <div class="who muted">The other fan</div>
+        <!-- Pairing (shown until a peer connects) -->
+        <div id="pairBox" class="pair">
+          <div class="flag muted">🌍</div>
+          <div class="who muted">Pair with a fan</div>
+          <form id="connectForm" class="send">
+            <label>Room code (share it with the other fan)
+              <input id="roomCode" placeholder="worldcup-final" autocomplete="off" spellcheck="false" />
+            </label>
+            <button type="submit" id="connectBtn" class="send-btn alt">Connect over P2P →</button>
+            <div class="hint" id="pairHint">Both fans type the same code. No server — just Hyperswarm.</div>
+          </form>
+        </div>
 
-        <form id="sendForm" class="send">
-          <label>Their wallet address
-            <input id="toAddr" placeholder="0x…" autocomplete="off" spellcheck="false" />
-          </label>
-          <label>Amount (USDt)
-            <input id="amount" placeholder="1.5" inputmode="decimal" autocomplete="off" />
-          </label>
-          <button type="submit" id="sendBtn" class="send-btn">Send USDt →</button>
-          <div class="hint">Phase 2 auto-fills this from a P2P room code / QR.</div>
-        </form>
+        <!-- Connected peer card (hidden until identity arrives) -->
+        <div id="peerCard" class="peer-card" hidden>
+          <div class="flag" id="peerFlag">🏳️</div>
+          <div class="who"><span id="peerName">—</span> · <span class="nation" id="peerNation">—</span></div>
+          <code id="peerAddr" class="addr">—</code>
+
+          <form id="sendForm" class="send">
+            <label>Send USDt to <span id="peerNameShort">them</span>
+              <input id="amount" placeholder="1.5" inputmode="decimal" autocomplete="off" />
+            </label>
+            <div class="btn-row">
+              <button type="submit" id="sendBtn" class="send-btn">Send USDt →</button>
+              <button type="button" id="requestBtn" class="send-btn ghost">Request</button>
+            </div>
+          </form>
+
+          <form id="chatForm" class="chat">
+            <input id="chatInput" placeholder="Say something…" autocomplete="off" maxlength="2000" />
+            <button type="submit" class="mini">Send</button>
+          </form>
+        </div>
       </section>
     </main>
 
     <section class="log">
       <div class="log-title">Activity</div>
-      <ul id="logList"><li class="empty">No transfers yet.</li></ul>
+      <ul id="logList"><li class="empty">No activity yet.</li></ul>
     </section>
 
     <script src="/app.js"></script>

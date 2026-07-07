@@ -2,6 +2,26 @@
 
 > A fresh session should be able to resume from this file + `DECISIONS.md` + `RISKS.md` alone.
 
+## Session handoff (read first if resuming)
+- **Git:** branch `main`, working tree clean, all work committed **and pushed** to
+  `origin` = https://github.com/tang-vu/halfscarf.git.
+- **Build state:** Phases 0–4 complete. The product runs; all three tracks verified end to end.
+- **Ephemeral local state NOT in git — already set up, do NOT regenerate:**
+  - `.env` → `WDK_SEED` (funded dev wallet #0 = `0xD38e838ccfcFDb072329EfF5F0e0f80659CE4EE9`),
+    `USDT_ADDRESS` = `0x6aDf4df836fC3E1DF8613a78e0CE006504AB2Ec2` (deployed TestUSDT), `SEPOLIA_RPC_URL`.
+  - `.data/alice.seed` = the funded wallet (Alice, holds ~999,9xx TestUSDT + Sepolia ETH gas);
+    `.data/bob.seed` = Bob (holds test USDt from demo runs). These let Alice tip immediately.
+  - On a different machine: rerun `spikes/gen-dev-wallet.ts` + `spikes/deploy-test-usdt.ts`, or copy `.env`/`.data`.
+- **Run the demo (2 terminals):**
+  `INSTANCE=Alice NATION=Argentina FLAG=🇦🇷 LANG_CODE=es PORT=3001 npm start`
+  `INSTANCE=Bob NATION=England FLAG=🏴 LANG_CODE=en PORT=3002 npm start`
+  → same room code → Connect → hold 🎙️ to talk → 🍺 quick-tip.
+- **Stopping servers:** kill by port (TaskStop/npm orphans the node child):
+  `netstat -ano | grep :PORT` → `taskkill //F //PID`.
+- **Open decisions for the user (not done):** (1) record the 3-min demo video (human step);
+  (2) pick an optional stretch if any — peer-side **TTS** (hear vs read) / **QR** pairing / **Pear** packaging.
+- **User preference:** replies in Vietnamese (also saved in cross-session memory).
+
 ## Now
 **Phases 0–4 COMPLETE — full product integrated and demoable.** All three tracks work end to end.
 Remaining: record the 3-minute demo video; optional stretches (peer-side TTS "hearing", QR pairing,

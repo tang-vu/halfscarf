@@ -94,6 +94,12 @@ Hyperswarm discovery reliable (first join can miss otherwise). `npm run typechec
       (Remaining human step: record the 3-min video. Optional stretches below.)
 
 ## Extras
+- [x] **Demo video PRODUCED** — `Desktop/halfscarf-demo-3min.mp4` (1:57, 1920×800, h264+aac).
+      A real recorded session (not staged): live DHT pairing w/ QR, both voice directions
+      (QVAC STT+NMT, ~3.3s each), on-chain 1-USDT tip received via P2P in 3s. Narrated by the
+      app's own Supertonic TTS. Producer scripts in scratchpad `video/` (record-demo-video.js,
+      assemble-demo-video.js). Remaining human step: upload to YouTube (unlisted) + submit DoraHacks.
+      Producing it surfaced & fixed 2 real bugs: model double-load race, [hidden] vs display:flex.
 - [x] **Landing page** (`site/` + root `vercel.json`, static, zero-build) — dark "matchday editorial"
       split-scarf design; pure-CSS 14s demo loop; all metrics on it are real measured numbers.
       Deploy: import the GitHub repo on vercel.com (zero-config) or `npx vercel --prod` from repo root.

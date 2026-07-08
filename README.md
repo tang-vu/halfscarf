@@ -17,6 +17,7 @@ Built for the **Tether Developers Cup**, combining all three tracks:
 > `DECISIONS.md` for the verified SDK APIs + measured latency.
 >
 > 🌐 Landing page: **[halfscarf.vercel.app](https://halfscarf.vercel.app)** (the app itself always runs on-device — see below).
+> 🎬 Demo video (1:57, a real recorded session): **[youtu.be/mgoiOvaGNhU](https://youtu.be/mgoiOvaGNhU)**
 
 ## ⚡ Judges: run it in two minutes (no blockchain setup)
 
